@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.421
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Autocad.API", "Autocad.API\Autocad.API.csproj", "{52391CA3-EA28-4178-823F-5B0B532394A6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BRXXXX.DTO", "BRXXXX.DTO\BRXXXX.DTO.csproj", "{64DD85B9-2214-4BE2-97EF-858C69A7BE68}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "REST.Client", "REST.Client\REST.Client.csproj", "{AE48C96F-805D-4430-A8B4-4DA3B6DD7E0C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{52391CA3-EA28-4178-823F-5B0B532394A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52391CA3-EA28-4178-823F-5B0B532394A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52391CA3-EA28-4178-823F-5B0B532394A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52391CA3-EA28-4178-823F-5B0B532394A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64DD85B9-2214-4BE2-97EF-858C69A7BE68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64DD85B9-2214-4BE2-97EF-858C69A7BE68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64DD85B9-2214-4BE2-97EF-858C69A7BE68}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64DD85B9-2214-4BE2-97EF-858C69A7BE68}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE48C96F-805D-4430-A8B4-4DA3B6DD7E0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE48C96F-805D-4430-A8B4-4DA3B6DD7E0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE48C96F-805D-4430-A8B4-4DA3B6DD7E0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE48C96F-805D-4430-A8B4-4DA3B6DD7E0C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AF400F2D-24FC-4382-8295-E8B94E681C51}
+	EndGlobalSection
+EndGlobal
