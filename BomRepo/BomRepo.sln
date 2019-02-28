@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BRXXXX.DTO", "BRXXXX.DTO\BR
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "REST.Client", "REST.Client\REST.Client.csproj", "{AE48C96F-805D-4430-A8B4-4DA3B6DD7E0C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "REST.API", "REST.API\REST.API.csproj", "{4C093D95-AA24-4CDB-8674-9BF0A75E7FFD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{AE48C96F-805D-4430-A8B4-4DA3B6DD7E0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE48C96F-805D-4430-A8B4-4DA3B6DD7E0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AE48C96F-805D-4430-A8B4-4DA3B6DD7E0C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C093D95-AA24-4CDB-8674-9BF0A75E7FFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C093D95-AA24-4CDB-8674-9BF0A75E7FFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C093D95-AA24-4CDB-8674-9BF0A75E7FFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C093D95-AA24-4CDB-8674-9BF0A75E7FFD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
