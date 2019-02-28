@@ -56,6 +56,9 @@
     <Compile Include="..\BRXXXX.DTO\PartReferenceDTO.cs">
       <Link>BRXXXX.DTO\PartReferenceDTO.cs</Link>
     </Compile>
+    <Compile Include="..\REST.Client\Connector.cs">
+      <Link>REST.Client\Connector.cs</Link>
+    </Compile>
     <Compile Include="Commands.cs" />
     <Compile Include="ErrorCatalogs.cs" />
     <Compile Include="Helper.cs" />

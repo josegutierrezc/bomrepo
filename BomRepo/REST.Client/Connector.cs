@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace BomRepo.REST.Client
 {
-    public class Client
+    public class Connector
     {
         #region Singleton
-        private static Client singleton;
-        public static Client Instance {
+        private static Connector singleton;
+        public static Connector Instance {
             get {
-                if (singleton == null) singleton = new Client();
+                if (singleton == null) singleton = new Connector();
                 return singleton;
             }
         }

@@ -3,8 +3,10 @@ using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using acadApp = Autodesk.AutoCAD.ApplicationServices.Application;
-using BomRepo.BRXXXX.DTO;
 using System.Collections.Generic;
+
+using BomRepo.BRXXXX.DTO;
+using BomRepo.REST.Client;
 
 namespace BomRepo.Autocad.API
 {
@@ -18,6 +20,7 @@ namespace BomRepo.Autocad.API
         [CommandMethod("brconnect")]
         public void brconnect()
         {
+            
         }
 
         /// <summary>
