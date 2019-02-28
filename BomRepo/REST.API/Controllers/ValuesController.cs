@@ -2,15 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace REST.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/[controller]")]
     [ApiController]
     public class ValuesController : ControllerBase
     {
-        // GET api/values
+        // GET api/v1/values
         [HttpGet]
         public ActionResult<IEnumerable<string>> Get()
         {
