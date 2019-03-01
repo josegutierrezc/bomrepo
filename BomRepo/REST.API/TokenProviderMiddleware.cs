@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using BomRepo.BRMaster.DTO;
 
 namespace BomRepo.REST.API
 {
@@ -17,63 +18,95 @@ namespace BomRepo.REST.API
         private readonly RequestDelegate _next;
         private readonly TokenProviderOptions _options;
 
-        public TokenProviderMiddleware(
-            RequestDelegate next,
-            IOptions<TokenProviderOptions> options)
-        {
+        //just for testing proposes
+        private List<UserDTO> usersRepo = new List<UserDTO>() {
+            new UserDTO() { Id = 1, Username = "jose", Password = "e10adc3949ba59abbe56e057f20f883e" },
+            new UserDTO() { Id = 2, Username = "jesus", Password = "e10adc3949ba59abbe56e057f20f883e" }
+        };
+        private List<UserAccessTokensDTO> userAccessTokensRepo = new List<UserAccessTokensDTO>() {
+            new UserAccessTokensDTO() { UserId = 1, App = "autocad", AccessToken = "" },
+            new UserAccessTokensDTO() { UserId = 2, App = "autocad", AccessToken = "" }
+        };
+
+        public TokenProviderMiddleware(RequestDelegate next, IOptions<TokenProviderOptions> options) {
             _next = next;
             _options = options.Value;
         }
 
         public Task Invoke(HttpContext context)
         {
-            // If the request path doesn't match, skip
-            if (!context.Request.Path.Equals(_options.Path, StringComparison.Ordinal))
+            //All request have to contain Authorization and User-Agent headers 
+            if (!context.Request.Headers.ContainsKey("Authorization") || !context.Request.Headers.ContainsKey("User-Agent"))
             {
-                return _next(context);
-            }
-
-            //// Request must be POST with Content-Type: application/x-www-form-urlencoded
-            //if (!context.Request.Method.Equals("POST")
-            //   || !context.Request.HasFormContentType)
-            //{
-            //    context.Response.StatusCode = 400;
-            //    return context.Response.WriteAsync("Bad request.");
-            //}
-
-            // Request must be POST with Authentication Header
-            if (!context.Request.Method.Equals("POST") || !context.Request.Headers.ContainsKey("Authorization")) {
                 context.Response.StatusCode = 400;
                 return context.Response.WriteAsync("Bad request.");
             }
 
-            return GenerateToken(context);
+            //Get Authorization and User-Agent Header values
+            Tuple<string, string> authHeader = Helper.GetAuthorizationHeaderValuesFromString(context.Request.Headers["Authorization"].ToString());
+            string userAgent = context.Request.Headers["User-Agent"].ToString().ToLower();
+
+            // If the request path doesn't match, then validate token
+            if (!context.Request.Path.Equals(_options.Path, StringComparison.Ordinal))
+            {
+                //If it is a valid token then move request to the controller
+                if (IsValidToken(context, authHeader, userAgent)) return _next(context);
+                
+                //If it is not a valid token then return error
+                context.Response.StatusCode = 401;
+                return context.Response.WriteAsync("Unauthorized.");
+            }
+
+            // Request must be POST
+            if (!context.Request.Method.Equals("POST")) {
+                context.Response.StatusCode = 400;
+                return context.Response.WriteAsync("Bad request.");
+            }
+
+            //Verify request is comming from authorized user agents
+            if (userAgent != "autocad" & userAgent != "inventor" & userAgent != "web.api") {
+                context.Response.StatusCode = 400;
+                return context.Response.WriteAsync("Bad request.");
+            }
+
+            //Return the new token
+            return GenerateToken(context, authHeader, userAgent);
         }
 
-        private async Task GenerateToken(HttpContext context)
+        private bool IsValidToken(HttpContext context, Tuple<string, string> AuthHeaderValues, string UserAgentHeaderValue) {
+            if (!AuthHeaderValues.Item1.ToLower().StartsWith("bearer")) return false;
+
+            //Get jwt
+            var decodedJwt = new JwtSecurityTokenHandler().ReadJwtToken(AuthHeaderValues.Item2);
+
+            //Define if token was issued by us
+            if (decodedJwt.Issuer != _options.Issuer | decodedJwt.Audiences.FirstOrDefault() != _options.Audience) return false;
+
+            //Define if token has expired
+            if (decodedJwt.ValidTo < DateTime.UtcNow) return false;
+
+            //Get username from claim
+            string username = decodedJwt.Claims.Where(c => c.Type == JwtRegisteredClaimNames.Sub).FirstOrDefault().Value;
+
+            //VErify token exist and is assigned to the right user
+            return TokenExists(username, UserAgentHeaderValue, AuthHeaderValues.Item2);
+        }
+
+        private async Task GenerateToken(HttpContext context, Tuple<string, string> AuthHeaderValues, string UserAgent)
         {
-            //var username = context.Request.Form["username"];
-            //var password = context.Request.Form["password"];
-
-            string authHeader = context.Request.Headers["Authorization"].ToString();
-            string username = "TEST";
-            string password = "TEST123";
-            if (authHeader != string.Empty && authHeader.ToLower().StartsWith("basic"))
+            string username = string.Empty;
+            string password = string.Empty;
+            if (AuthHeaderValues.Item1.ToLower().StartsWith("basic"))
             {
-                string[] authHeaderParts = authHeader.Split(" ");
-
-                var base64EncodedBytes = System.Convert.FromBase64String(authHeaderParts[1]);
-                string decodedAuthHeader = System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
-
-                string[] userpassword = decodedAuthHeader.Split(":");
-                username = userpassword[0];
-                password = userpassword[1];
+                Tuple<string, string> usernamepassword = Helper.GetUsernameAndPasswordFromEncodedString(AuthHeaderValues.Item2);
+                username = usernamepassword.Item1;
+                password = usernamepassword.Item2;
             }
 
             var identity = await GetIdentity(username, password);
             if (identity == null)
             {
-                context.Response.StatusCode = 400;
+                context.Response.StatusCode = 401;
                 await context.Response.WriteAsync("Invalid username or password.");
                 return;
             }
@@ -112,14 +145,18 @@ namespace BomRepo.REST.API
 
         private Task<ClaimsIdentity> GetIdentity(string username, string password)
         {
-            // DON'T do this in production, obviously!
-            if (username == "TEST" && password == "TEST123")
-            {
-                return Task.FromResult(new ClaimsIdentity(new System.Security.Principal.GenericIdentity(username, "Token"), new Claim[] { }));
-            }
+            var user = usersRepo.Where(u => u.Username == username & u.Password == password).FirstOrDefault();
+            if (user == null) return Task.FromResult<ClaimsIdentity>(null);
 
-            // Credentials are invalid, or account doesn't exist
-            return Task.FromResult<ClaimsIdentity>(null);
+            return Task.FromResult(new ClaimsIdentity(new System.Security.Principal.GenericIdentity(username, "Token"), new Claim[] { }));
+        }
+
+        private bool TokenExists(string Username, string App, string Token) {
+            var result = from u in usersRepo
+                         join t in userAccessTokensRepo on u.Id equals t.UserId
+                         where u.Username == Username & t.App == App
+                         select t;
+            return result.FirstOrDefault() != null;
         }
     }
 
@@ -127,7 +164,7 @@ namespace BomRepo.REST.API
         public string Path { get; set; }
         public string Issuer { get; set; }
         public string Audience { get; set; }
-        public TimeSpan Expiration { get; set; } = TimeSpan.FromMinutes(5);
+        public TimeSpan Expiration { get; set; } = TimeSpan.FromMinutes(1);
         public SigningCredentials SigningCredentials { get; set; }
     }
 }

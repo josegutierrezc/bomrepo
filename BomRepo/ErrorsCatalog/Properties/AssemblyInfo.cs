@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("BomRepo.Autocad.API")]
+[assembly: AssemblyTitle("ErrorsCatalog")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("BomRepo.Autocad.API")]
+[assembly: AssemblyProduct("ErrorsCatalog")]
 [assembly: AssemblyCopyright("Copyright ©  2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("52391ca3-ea28-4178-823f-5b0b532394a6")]
+[assembly: Guid("c2f5bbe8-f4b3-4a1d-aa6b-258b86b6f495")]
 
 // Version information for an assembly consists of the following four values:
 //

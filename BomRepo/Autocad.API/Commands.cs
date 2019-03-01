@@ -4,9 +4,10 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using acadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 using System.Collections.Generic;
-
 using BomRepo.BRXXXX.DTO;
 using BomRepo.REST.Client;
+using System.Threading.Tasks;
+using System;
 
 namespace BomRepo.Autocad.API
 {
@@ -18,17 +19,55 @@ namespace BomRepo.Autocad.API
         /// brconnect authenticates user against the web service
         /// </summary>
         [CommandMethod("brconnect")]
-        public void brconnect()
+        public async void brconnect()
         {
+            //Show Messages
+            AutocadHelper.ShowCommandLineMessage(new string[1] { "BOMRepo version " + assemblyVersion });
             
+            //Initialize variables
+            string username = string.Empty;
+            string password = string.Empty;
+
+            //Prepares editor
+            Editor acEditor = acadApp.DocumentManager.CurrentDocument.Editor;
+
+            //Ask for username
+            PromptResult promptUsernameResult = acEditor.GetString(new PromptStringOptions("Username"));
+            if (promptUsernameResult.Status != PromptStatus.OK) return;
+            username = promptUsernameResult.StringResult;
+
+            //Ask for Password
+            PromptResult promptPasswordResult = acEditor.GetString(new PromptStringOptions("Password"));
+            if (promptPasswordResult.Status != PromptStatus.OK) return;
+            password = promptPasswordResult.StringResult;
+
+            //Try to connect
+            bool connected = await BomRepoServiceClient.Instance.Connect(username, password);
+
+            //Show connection result
+            if (connected)
+                AutocadHelper.ShowCommandLineMessage(new string[1] { "Successfully connected." });
+            else
+                AutocadHelper.ShowCommandLineMessage(new string[1] { BomRepoServiceClient.Instance.Error.GetUserDescription() });
+
+            AutocadHelper.ShowCommandLineMessage(new string[1] { "BRCONNECT successfully executed." });
         }
 
         /// <summary>
         /// brdefaultproject defines a default project to work with.
         /// </summary>
         [CommandMethod("brdefaultproject")]
-        public void brdefaultproject()
+        public async void brdefaultproject()
         {
+            //Show Messages
+            AutocadHelper.ShowCommandLineMessage(new string[1] { "BOMRepo version " + assemblyVersion });
+
+            string[] values = await BomRepoServiceClient.Instance.GetValues();
+
+            if (BomRepoServiceClient.Instance.ErrorOccurred)
+                AutocadHelper.ShowCommandLineMessage(new string[1] { BomRepoServiceClient.Instance.Error.GetUserDescription() });
+            
+            AutocadHelper.ShowCommandLineMessage(new string[1] { "BRDEFAULTPROJECT successfully executed." });
         }
 
         /// <summary>
@@ -82,7 +121,7 @@ namespace BomRepo.Autocad.API
                 }
 
                 //Validate assembly name
-                KeyValuePair<bool, string> assemblyNameValidationResult = Helper.IsValidPartName(assemblyName);
+                KeyValuePair<bool, string> assemblyNameValidationResult = AutocadHelper.IsValidPartName(assemblyName);
                 if (!assemblyNameValidationResult.Key)
                 {
                     acEditor.WriteMessage(assemblyNameValidationResult.Value);
@@ -98,7 +137,7 @@ namespace BomRepo.Autocad.API
             }
 
             //Get PartReferences from selection set
-            KeyValuePair<List<string>, SortedDictionary<string, PartReferenceDTO>> partReferences = Helper.GetPartReferencesFromSelection(acDb, promptSelectionResult.Value);
+            KeyValuePair<List<string>, SortedDictionary<string, PartReferenceDTO>> partReferences = AutocadHelper.GetPartReferencesFromSelection(acDb, promptSelectionResult.Value);
             List<string> errorLog = partReferences.Key;
             SortedDictionary<string, PartReferenceDTO> dictAssemblyParts = partReferences.Value;
 
@@ -135,7 +174,7 @@ namespace BomRepo.Autocad.API
             CellAlignment[] dataColumnAlignment = new CellAlignment[2] { CellAlignment.MiddleCenter, CellAlignment.MiddleLeft };
 
             //Insert Table
-            Helper.InsertTable(acDb, promptPointResult.Value, assemblyName, header, data, titleAlignment, headerAlignment, dataColumnAlignment);
+            AutocadHelper.InsertTable(acDb, promptPointResult.Value, assemblyName, header, data, titleAlignment, headerAlignment, dataColumnAlignment);
 
             //Show successful message
             acEditor.WriteMessage("\n\r" + dictAssemblyParts.Count.ToString() + " unique part(s) was/were found. " + totalCount.ToString() + " total part(s) was/were count.\n\r");

@@ -7,10 +7,11 @@ using Autodesk.AutoCAD.EditorInput;
 using acadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 using Autodesk.AutoCAD.Geometry;
 using BomRepo.BRXXXX.DTO;
+using BomRepo.ErrorsCatalog;
 
 namespace BomRepo.Autocad.API
 {
-    public static class Helper
+    public static class AutocadHelper
     {
         public static KeyValuePair<bool, string> IsValidPartName(string PartName)
         {
@@ -183,6 +184,12 @@ namespace BomRepo.Autocad.API
                 acTrans.Commit();
             }
             return new KeyValuePair<List<string>, SortedDictionary<string, PartReferenceDTO>>(errorLog, dictAssemblyParts);
+        }
+        public static void ShowCommandLineMessage(string[] Messages) {
+            //Prepares editor
+            Editor acEditor = acadApp.DocumentManager.CurrentDocument.Editor;
+
+            foreach (string message in Messages) acEditor.WriteMessage(message + "\n\r");
         }
     }
 }

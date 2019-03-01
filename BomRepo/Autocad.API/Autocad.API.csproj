@@ -43,6 +43,9 @@
     <Reference Include="acmgd">
       <HintPath>..\..\..\..\..\..\..\Program Files\Autodesk\AutoCAD 2016\acmgd.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -53,16 +56,27 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\BRMaster.DTO\UsersDTO.cs">
+      <Link>BRMaster.DTO\UsersDTO.cs</Link>
+    </Compile>
     <Compile Include="..\BRXXXX.DTO\PartReferenceDTO.cs">
       <Link>BRXXXX.DTO\PartReferenceDTO.cs</Link>
+    </Compile>
+    <Compile Include="..\ErrorsCatalog\ErrorsCatalog.cs">
+      <Link>ErrorsCatalog\ErrorsCatalog.cs</Link>
     </Compile>
     <Compile Include="..\REST.Client\Connector.cs">
       <Link>REST.Client\Connector.cs</Link>
     </Compile>
+    <Compile Include="..\REST.Client\Helper.cs">
+      <Link>REST.Client\Helper.cs</Link>
+    </Compile>
     <Compile Include="Commands.cs" />
-    <Compile Include="ErrorCatalogs.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
