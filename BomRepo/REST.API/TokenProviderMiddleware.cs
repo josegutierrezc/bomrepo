@@ -10,23 +10,17 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using BomRepo.BRMaster.DTO;
+using BomRepo.BRMaster.DL;
 
 namespace BomRepo.REST.API
 {
     public class TokenProviderMiddleware
     {
+        private const string useragentautocad = "autocad";
+        private const string useragentinventor = "inventor";
+        private const string useragentwebapi = "web.api";
         private readonly RequestDelegate _next;
         private readonly TokenProviderOptions _options;
-
-        //just for testing proposes
-        private List<UserDTO> usersRepo = new List<UserDTO>() {
-            new UserDTO() { Id = 1, Username = "jose", Password = "e10adc3949ba59abbe56e057f20f883e" },
-            new UserDTO() { Id = 2, Username = "jesus", Password = "e10adc3949ba59abbe56e057f20f883e" }
-        };
-        private List<UserAccessTokensDTO> userAccessTokensRepo = new List<UserAccessTokensDTO>() {
-            new UserAccessTokensDTO() { UserId = 1, App = "autocad", AccessToken = "" },
-            new UserAccessTokensDTO() { UserId = 2, App = "autocad", AccessToken = "" }
-        };
 
         public TokenProviderMiddleware(RequestDelegate next, IOptions<TokenProviderOptions> options) {
             _next = next;
@@ -63,8 +57,8 @@ namespace BomRepo.REST.API
                 return context.Response.WriteAsync("Bad request.");
             }
 
-            //Verify request is comming from authorized user agents
-            if (userAgent != "autocad" & userAgent != "inventor" & userAgent != "web.api") {
+            //Verify request is comming from no authorized user agents
+            if (userAgent != useragentautocad & userAgent != useragentinventor & userAgent != useragentwebapi) {
                 context.Response.StatusCode = 400;
                 return context.Response.WriteAsync("Bad request.");
             }
@@ -79,7 +73,7 @@ namespace BomRepo.REST.API
             //Get jwt
             var decodedJwt = new JwtSecurityTokenHandler().ReadJwtToken(AuthHeaderValues.Item2);
 
-            //Define if token was issued by us
+            //Define if token was issued by us cheking audience
             if (decodedJwt.Issuer != _options.Issuer | decodedJwt.Audiences.FirstOrDefault() != _options.Audience) return false;
 
             //Define if token has expired
@@ -138,6 +132,12 @@ namespace BomRepo.REST.API
                 expires_in = (int)_options.Expiration.TotalSeconds
             };
 
+            //Save it in db
+            using (var db = new BRMasterModel()) {
+                UsersManager usersMan = new UsersManager(db);
+                bool updated = usersMan.SetToken(username, UserAgent, encodedJwt);
+            }
+
             // Serialize and return the response
             context.Response.ContentType = "application/json";
             await context.Response.WriteAsync(JsonConvert.SerializeObject(response, new JsonSerializerSettings { Formatting = Formatting.Indented }));
@@ -145,18 +145,34 @@ namespace BomRepo.REST.API
 
         private Task<ClaimsIdentity> GetIdentity(string username, string password)
         {
-            var user = usersRepo.Where(u => u.Username == username & u.Password == password).FirstOrDefault();
-            if (user == null) return Task.FromResult<ClaimsIdentity>(null);
+            try
+            {
+                using (var db = new BRMasterModel())
+                {
+                    UsersManager usersMan = new UsersManager(db);
+                    User user = usersMan.Get(username, password);
+                    if (user == null) return Task.FromResult<ClaimsIdentity>(null);
 
-            return Task.FromResult(new ClaimsIdentity(new System.Security.Principal.GenericIdentity(username, "Token"), new Claim[] { }));
+                    return Task.FromResult(new ClaimsIdentity(new System.Security.Principal.GenericIdentity(username, "Token"), new Claim[] { }));
+                }
+            }
+            catch (Exception e) {
+                return null;
+            }
         }
 
-        private bool TokenExists(string Username, string App, string Token) {
-            var result = from u in usersRepo
-                         join t in userAccessTokensRepo on u.Id equals t.UserId
-                         where u.Username == Username & t.App == App
-                         select t;
-            return result.FirstOrDefault() != null;
+        private bool TokenExists(string username, string useragent, string token) {
+            using (var db = new BRMasterModel()) {
+                UsersManager usersMan = new UsersManager(db);
+                User user = usersMan.GetByToken(token);
+                if (user == null) return false;
+
+                if (useragent.ToLower() == useragentautocad) if (user.AutocadToken == token) return true;
+                if (useragent.ToLower() == useragentinventor) if (user.InventorToken == token) return true;
+                if (useragent.ToLower() == useragentwebapi) if (user.WebToken == token) return true;
+
+                return false;
+            }
         }
     }
 
@@ -164,7 +180,7 @@ namespace BomRepo.REST.API
         public string Path { get; set; }
         public string Issuer { get; set; }
         public string Audience { get; set; }
-        public TimeSpan Expiration { get; set; } = TimeSpan.FromMinutes(1);
+        public TimeSpan Expiration { get; set; } = TimeSpan.FromMinutes(2);
         public SigningCredentials SigningCredentials { get; set; }
     }
 }

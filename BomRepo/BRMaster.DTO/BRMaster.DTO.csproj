@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CostumersDTO.cs" />
     <Compile Include="UserAccessTokensDTO.cs" />
     <Compile Include="UsersDTO.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -21,6 +21,7 @@ namespace BomRepo.REST.API
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            AutoMapperConfig.Register();
         }
 
         public IConfiguration Configuration { get; }
@@ -31,25 +32,6 @@ namespace BomRepo.REST.API
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        //public void Configure(IApplicationBuilder app, IHostingEnvironment env)
-        //{
-        //    if (env.IsDevelopment())
-        //    {
-        //        app.UseDeveloperExceptionPage();
-        //    }
-        //    else
-        //    {
-        //        app.UseHsts();
-        //    }
-
-        //    app.UseHttpsRedirection();
-        //    app.UseMvc();
-        //}
-
-        // The secret key every token will be signed with.
-        // In production, you should store this securely in environment variables
-        // or a key management tool. Don't hardcode this into your application!
         private static readonly string secretKey = "1KillsAll_secretkey!7809";
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)

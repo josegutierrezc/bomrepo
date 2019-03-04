@@ -121,9 +121,6 @@ namespace BomRepo.REST.Client
                 return string.Empty;
             }
 
-            ////Get Authorization Header
-            //return await Authorize(username, password);
-
             //Get Access Token
             Tuple<bool, string> accessToken = await TokenProviderMiddleware.Instance.GetAuthorizationHeaderValue(username, password);
 
