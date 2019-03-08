@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace BomRepo.BRXXXXX.DTO
 {
-    public class PartReferenceDTO
+    public partial class UserBranchAssemblyPartDTO
     {
+        public int Id { get; set; }
+        public int EntityId { get; set; }
+        public int UserBranchAssemblyId { get; set; }
         public string Name { get; set; }
         public int Qty { get; set; }
     }

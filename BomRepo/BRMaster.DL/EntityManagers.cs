@@ -4,10 +4,10 @@ using System.Text;
 
 namespace BomRepo.BRMaster.DL
 {
-    public class EntityManagers
+    public class EntityManager
     {
         protected BRMasterModel db;
-        public EntityManagers(BRMasterModel db) {
+        public EntityManager(BRMasterModel db) {
             this.db = db;
         }
     }

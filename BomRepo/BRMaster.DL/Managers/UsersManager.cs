@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace BomRepo.BRMaster.DL
 {
-    public class UsersManager : EntityManagers
+    public class UsersManager : EntityManager
     { 
         private const string useragentAutocad = "autocad";
         private const string useragentInventor = "inventor";
@@ -41,7 +41,6 @@ namespace BomRepo.BRMaster.DL
 
             return true;
         }
-
         public User Add(User user) {
             var entities = db.Users.Where(u => u.Username.ToLower() == user.Username.ToLower());
             if (entities.Count() != 0) return null;
@@ -69,7 +68,6 @@ namespace BomRepo.BRMaster.DL
 
             return true;
         }
-
         public bool Delete(string username) {
             var entity = db.Users.Where(u => u.Username == username & u.Username.ToLower() != sysadminuser).FirstOrDefault();
             if (entity == null) return false;

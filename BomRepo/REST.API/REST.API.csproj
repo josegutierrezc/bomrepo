@@ -20,6 +20,9 @@
   <ItemGroup>
     <ProjectReference Include="..\BRMaster.DL\BRMaster.DL.csproj" />
     <ProjectReference Include="..\BRMaster.DTO\BRMaster.DTO.csproj" />
+    <ProjectReference Include="..\BRXXXX.DTO\BRXXXX.DTO.csproj" />
+    <ProjectReference Include="..\BRXXXXX.DL\BRXXXXX.DL.csproj" />
+    <ProjectReference Include="..\ErrorsCatalog\ErrorsCatalog.csproj" />
   </ItemGroup>
 
 </Project>

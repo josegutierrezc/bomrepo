@@ -39,27 +39,17 @@ namespace BomRepo.BRMaster.DL
 
             modelBuilder.Entity<Costumer>(entity =>
             {
-                entity.Property(e => e.City).HasMaxLength(2);
-
                 entity.Property(e => e.Name).IsRequired();
-
                 entity.Property(e => e.Number).IsRequired();
-
-                entity.Property(e => e.State).HasMaxLength(2);
-
                 entity.Property(e => e.ZipCode).HasMaxLength(50);
             });
 
             modelBuilder.Entity<User>(entity =>
             {
                 entity.Property(e => e.CreatedOn).HasColumnType("datetime");
-
                 entity.Property(e => e.Firstname).IsRequired();
-
                 entity.Property(e => e.Lastname).IsRequired();
-
                 entity.Property(e => e.Password).IsRequired();
-
                 entity.Property(e => e.Username).IsRequired();
             });
         }

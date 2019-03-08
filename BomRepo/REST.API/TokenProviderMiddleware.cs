@@ -152,6 +152,7 @@ namespace BomRepo.REST.API
                     UsersManager usersMan = new UsersManager(db);
                     User user = usersMan.Get(username, password);
                     if (user == null) return Task.FromResult<ClaimsIdentity>(null);
+                    if (!user.IsActive) return Task.FromResult<ClaimsIdentity>(null);
 
                     return Task.FromResult(new ClaimsIdentity(new System.Security.Principal.GenericIdentity(username, "Token"), new Claim[] { }));
                 }
@@ -180,7 +181,7 @@ namespace BomRepo.REST.API
         public string Path { get; set; }
         public string Issuer { get; set; }
         public string Audience { get; set; }
-        public TimeSpan Expiration { get; set; } = TimeSpan.FromMinutes(2);
+        public TimeSpan Expiration { get; set; } = TimeSpan.FromMinutes(5);
         public SigningCredentials SigningCredentials { get; set; }
     }
 }

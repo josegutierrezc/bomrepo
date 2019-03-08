@@ -7,7 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using BomRepo.BRMaster.DTO;
+using BomRepo.BRXXXXX.DTO;
 using BomRepo.ErrorsCatalog;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace BomRepo.REST.Client
 {
@@ -23,6 +25,7 @@ namespace BomRepo.REST.Client
         }
         #endregion
 
+        private static readonly string secretKey = "1KillsAll_secretkey!7809";
         private ErrorDefinition latestErrorDefinition;
         private string username;
         private string password;
@@ -72,7 +75,12 @@ namespace BomRepo.REST.Client
             return !ErrorOccurred;
         }
 
-        public async Task<string[]> GetValues() {
+        /// <summary>
+        /// Get user
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns>A List<User></returns>
+        public async Task<UserDTO> GetUser(string username) {
             //Initialize communication and get authentication header
             string authHeader = await InitializeCommunication();
 
@@ -88,12 +96,52 @@ namespace BomRepo.REST.Client
                 HttpResponseMessage response = null;
                 using (var client = new BomRepoHttpClient("application/json", authHeader))
                 {
-                    response = await client.GetAsync("api/v1/values");
+                    response = await client.GetAsync("api/v1/users/" + username);
                     if (response.IsSuccessStatusCode)
                     {
                         var jsonData = response.Content.ReadAsStringAsync().Result;
-                        string[] values = JsonConvert.DeserializeObject<string[]>(jsonData);
-                        return values;
+                        UserDTO entity = JsonConvert.DeserializeObject<UserDTO>(jsonData);
+                        if (entity.Costumers.Count() == 0)
+                            latestErrorDefinition = ErrorCatalog.NoCostumerAssociation;
+                        return entity;
+                    }
+                    else if (response.StatusCode == System.Net.HttpStatusCode.NotFound) {
+                        latestErrorDefinition = ErrorCatalog.InvalidCredentials;
+                        return null;
+                    }
+                }
+
+                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized) authHeader = await RefreshToken();
+                requests += 1;
+            }
+
+            latestErrorDefinition = ErrorCatalog.ServiceUnavailableOrInvalidCredentials;
+            return null;
+        }
+
+        public async Task<List<ProjectDTO>> GetProjects(string costumernumber) {
+            //Initialize communication and get authentication header
+            string authHeader = await InitializeCommunication();
+
+            //If something happen then return null and lets the external user take care of the error.
+            if (ErrorOccurred) return null;
+
+            //If everything goes well then lets try to get the data from the service with the authorization header obtained from the InitializationMethod
+            //Define the total of requests we can send to the service, if token is valid only one will be needed. If token is invalid then two
+            //If at the second request we get no positive response then something is happening with the service or credentials are
+            //incorrect, in this case change the latesterrordefinition indicating that
+            int requests = 1;
+            while (requests <= 2)
+            {
+                HttpResponseMessage response = null;
+                using (var client = new BomRepoHttpClient("application/json", authHeader))
+                {
+                    response = await client.GetAsync("api/v1/costumers/" + costumernumber + "/projects");
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var jsonData = response.Content.ReadAsStringAsync().Result;
+                        List<ProjectDTO> entity = JsonConvert.DeserializeObject<List<ProjectDTO>>(jsonData);
+                        return entity;
                     }
                 }
 
@@ -203,7 +251,6 @@ namespace BomRepo.REST.Client
             }
         }
         #endregion
-
         private AccessToken accessToken;
         private ErrorDefinition latestErrorDefinition;
         private string username;
@@ -254,6 +301,11 @@ namespace BomRepo.REST.Client
         public async void RefreshToken() {
             accessToken = null;
             await GetAuthorizationHeaderValue(username, password);
+        }
+        public List<string> GetUserCostumerNumbers() {
+            //Get jwt
+            var decodedJwt = new JwtSecurityTokenHandler().ReadJwtToken(accessToken.access_token);
+            return null;
         }
     }
 

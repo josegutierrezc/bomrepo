@@ -6,8 +6,12 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using acadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 using Autodesk.AutoCAD.Geometry;
-using BomRepo.BRXXXX.DTO;
+using BomRepo.BRXXXXX.DTO;
 using BomRepo.ErrorsCatalog;
+using System.Windows.Forms;
+using BomRepo.REST.Client;
+using System.Threading.Tasks;
+using BomRepo.Autocad.API.Forms;
 
 namespace BomRepo.Autocad.API
 {
@@ -190,6 +194,32 @@ namespace BomRepo.Autocad.API
             Editor acEditor = acadApp.DocumentManager.CurrentDocument.Editor;
 
             foreach (string message in Messages) acEditor.WriteMessage(message + "\n\r");
+        }
+        public static void ShowErrorMessage(ErrorDefinition Error) {
+            MessageBoxIcon icon = Error.Classification == ErrorDefinitionClassification.Critical ? MessageBoxIcon.Error : Error.Classification == ErrorDefinitionClassification.Warning ? MessageBoxIcon.Warning : Error.Classification == ErrorDefinitionClassification.Informational ? MessageBoxIcon.Information : MessageBoxIcon.Asterisk;
+            MessageBox.Show(Error.UserDescription, "BomRepo " + Error.Code + ": " + Error.Title, MessageBoxButtons.OK, icon);
+        }
+
+        public static async Task<ProjectDTO> SelectProject(string CostumerNumber, ProjectDTO SelectedProject) {
+            //Get List of Projects
+            List<ProjectDTO> projects = await BomRepoServiceClient.Instance.GetProjects(CostumerNumber);
+
+            //Check if errors occurred
+            if (BomRepoServiceClient.Instance.ErrorOccurred) {
+                AutocadHelper.ShowCommandLineMessage(new string[1] { BomRepoServiceClient.Instance.Error.GetUserDescription() });
+                ShowErrorMessage(BomRepoServiceClient.Instance.Error);
+                return null;
+            }
+
+            //Show selection dialog
+            projectselectionform form = new projectselectionform(projects, SelectedProject);
+            if (form.ShowDialog() != DialogResult.OK)
+            {
+                AutocadHelper.ShowCommandLineMessage(new string[2] { "Command cancelled", "BRSELECTPROJECT successfully executed." });
+                return null;
+            }
+
+            return form.SelectedProject;
         }
     }
 }

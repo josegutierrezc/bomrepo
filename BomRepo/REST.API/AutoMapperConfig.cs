@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using BomRepo.BRMaster.DL;
 using BomRepo.BRMaster.DTO;
+using BomRepo.BRXXXXX.DL;
+using BomRepo.BRXXXXX.DTO;
 using AutoMapper;
 
 namespace BomRepo.REST.API
@@ -32,6 +34,11 @@ namespace BomRepo.REST.API
     {
         public BRXXXXProfile()
         {
+            CreateMap<Project, ProjectDTO>();
+            CreateMap<ProjectStatus, ProjectStatusDTO>();
+            CreateMap<UserBranch, UserBranchDTO>();
+            CreateMap<UserBranchAssembly, UserBranchAssemblyDTO>();
+            CreateMap<UserBranchAssemblyPart, UserBranchAssemblyPartDTO>();
         }
     }
 }

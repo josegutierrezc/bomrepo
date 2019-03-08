@@ -43,11 +43,24 @@
     <Reference Include="acmgd">
       <HintPath>..\..\..\..\..\..\..\Program Files\Autodesk\AutoCAD 2016\acmgd.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.IdentityModel.Logging, Version=5.4.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.IdentityModel.Logging.5.4.0\lib\net461\Microsoft.IdentityModel.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.Tokens, Version=5.4.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.IdentityModel.Tokens.5.4.0\lib\net461\Microsoft.IdentityModel.Tokens.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.IdentityModel" />
+    <Reference Include="System.IdentityModel.Tokens.Jwt">
+      <HintPath>..\..\..\..\..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\system.identitymodel.tokens.jwt\5.2.0\lib\netstandard1.4\System.IdentityModel.Tokens.Jwt.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -56,11 +69,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\BRMaster.DTO\CostumersDTO.cs">
+      <Link>BRMaster.DTO\CostumersDTO.cs</Link>
+    </Compile>
     <Compile Include="..\BRMaster.DTO\UsersDTO.cs">
       <Link>BRMaster.DTO\UsersDTO.cs</Link>
     </Compile>
     <Compile Include="..\BRXXXX.DTO\PartReferenceDTO.cs">
       <Link>BRXXXX.DTO\PartReferenceDTO.cs</Link>
+    </Compile>
+    <Compile Include="..\BRXXXX.DTO\ProjectDTO.cs">
+      <Link>BRXXXXX.DTO\ProjectDTO.cs</Link>
     </Compile>
     <Compile Include="..\ErrorsCatalog\ErrorsCatalog.cs">
       <Link>ErrorsCatalog\ErrorsCatalog.cs</Link>
@@ -72,11 +91,32 @@
       <Link>REST.Client\Helper.cs</Link>
     </Compile>
     <Compile Include="Commands.cs" />
+    <Compile Include="Forms\loginform.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\loginform.Designer.cs">
+      <DependentUpon>loginform.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\projectselectionform.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\projectselectionform.Designer.cs">
+      <DependentUpon>projectselectionform.cs</DependentUpon>
+    </Compile>
     <Compile Include="Helper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Forms\loginform.resx">
+      <DependentUpon>loginform.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\projectselectionform.resx">
+      <DependentUpon>projectselectionform.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

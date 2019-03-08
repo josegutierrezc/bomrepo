@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace BomRepo.BRMaster.DL
 {
-    public class CostumerUsersManager : EntityManagers
+    public class CostumerUsersManager : EntityManager
     {
         public CostumerUsersManager(BRMasterModel db) : base(db) {
         }

@@ -31,13 +31,19 @@ namespace REST.API.Controllers
         {
             using (var db = new BRMasterModel()) {
                 UsersManager usersMan = new UsersManager(db);
-                return Mapper.Map<User, UserDTO>(usersMan.Get(username));
+                CostumerUsersManager cosMan = new CostumerUsersManager(db);
+                UserDTO dto = Mapper.Map<User, UserDTO>(usersMan.Get(username));
+
+                if (dto == null) return NotFound();
+
+                dto.Costumers = Mapper.Map<List<Costumer>, List<CostumerDTO>>(cosMan.GetCostumers(username));
+                return dto;
             }
         }
 
         // POST api/v1/users
         [HttpPost]
-        public void Post([FromHeader] string header, [FromBody] UserDTO user)
+        public void Post([FromBody] UserDTO user)
         {
             
         }

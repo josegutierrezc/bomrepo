@@ -55,7 +55,5 @@ namespace BomRepo.REST.API
 
             app.UseMvc();
         }
-
-
     }
 }
