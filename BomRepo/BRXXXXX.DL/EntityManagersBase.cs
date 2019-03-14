@@ -1,23 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using BomRepo.ErrorsCatalog;
 
 namespace BomRepo.BRXXXXX.DL
 {
-    public class EntityManagerBase
+    public abstract class EntityManagerBase
     {
         protected BRXXXXXModel db;
-        protected string errorDescription;
+        protected ErrorDefinition errorDefinition;
         public bool ErrorOccurred {
-            get { return errorDescription != string.Empty; }
+            get { return errorDefinition != null; }
         }
-        public string ErrorDescription {
-            get { return errorDescription; }
+        public ErrorDefinition ErrorDefinition {
+            get { return errorDefinition; }
         }
         public EntityManagerBase(BRXXXXXModel db)
         {
             this.db = db;
-            errorDescription = string.Empty;
+            errorDefinition = null;
         }
+
+        public abstract object GetAll();
+        public abstract object Add(object entity);
+        public abstract object Get(int entityid);
+        public abstract bool Update(object entity);
+        public abstract bool Remove(int entityid);
     }
 }

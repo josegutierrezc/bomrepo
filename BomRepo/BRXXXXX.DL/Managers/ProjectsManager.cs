@@ -10,7 +10,7 @@ namespace BomRepo.BRXXXXX.DL
         public ProjectsManager(BRXXXXXModel db) : base(db) {
         }
 
-        public List<Project> GetAll() {
+        public override object GetAll() {
             var all = from p in db.Projects
                       join ps in db.ProjectStatuses on p.ProjectStatusId equals ps.Id
                       select new Project
@@ -30,6 +30,26 @@ namespace BomRepo.BRXXXXX.DL
 
         public Project Get(string number) {
             return db.Projects.Where(e => e.Number == number).FirstOrDefault();
+        }
+
+        public override object Add(object entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override object Get(int entityid)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override bool Update(object entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override bool Remove(int entityid)
+        {
+            throw new NotImplementedException();
         }
     }
 }

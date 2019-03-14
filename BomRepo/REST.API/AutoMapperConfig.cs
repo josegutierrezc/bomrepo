@@ -34,11 +34,12 @@ namespace BomRepo.REST.API
     {
         public BRXXXXProfile()
         {
+            CreateMap<Entity, EntityDTO>();
+            CreateMap<Part, PartDTO>();
             CreateMap<Project, ProjectDTO>();
             CreateMap<ProjectStatus, ProjectStatusDTO>();
             CreateMap<UserBranch, UserBranchDTO>();
-            CreateMap<UserBranchAssembly, UserBranchAssemblyDTO>();
-            CreateMap<UserBranchAssemblyPart, UserBranchAssemblyPartDTO>();
+            CreateMap<UserBranchPart, UserBranchPartDTO>();
         }
     }
 }

@@ -18,12 +18,12 @@ namespace BomRepo.BRXXXXX.DL
         public virtual DbSet<Project> Projects { get; set; }
         public virtual DbSet<ProjectStatus> ProjectStatuses { get; set; }
         public virtual DbSet<UserBranch> UserBranches { get; set; }
-        public virtual DbSet<UserBranchAssembly> UserBranchAssemblies { get; set; }
-        public virtual DbSet<UserBranchAssemblyPart> UserBranchAssemblyParts { get; set; }
+        public virtual DbSet<UserBranchPart> UserBranchParts { get; set; }
+        public virtual DbSet<UserBranchPartPlacement> UserBranchPartPlacements { get; set; }
         public virtual DbSet<Entity> Entities { get; set; }
         public virtual DbSet<ProjectEntity> ProjectEntities { get; set; }
-        public virtual DbSet<Assembly> Assemblies { get; set; }
         public virtual DbSet<Part> Parts { get; set; }
+        public virtual DbSet<PartPlacement> PartPlacements { get; set; }
         
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -60,19 +60,18 @@ namespace BomRepo.BRXXXXX.DL
                 entity.Property(e => e.CreatedOn).IsRequired();
             });
 
-            modelBuilder.Entity<UserBranchAssembly>(entity =>
+            modelBuilder.Entity<UserBranchPart>(entity =>
             {
                 entity.HasKey(e => new { e.Id });
                 entity.Property(e => e.CreatedOn).IsRequired();
                 entity.Property(e => e.UserBranchId).IsRequired();
+                entity.Property(e => e.EntityId).IsRequired();
                 entity.Property(e => e.Name).IsRequired();
             });
 
-            modelBuilder.Entity<UserBranchAssemblyPart>(entity =>
+            modelBuilder.Entity<UserBranchPartPlacement>(entity =>
             {
-                entity.HasKey(e => new { e.Id });
-                entity.Property(e => e.UserBranchAssemblyId).IsRequired();
-                entity.Property(e => e.Name).IsRequired();
+                entity.HasKey(e => new { e.UserBranchId, e.ParentUserBranchPartId, e.ChildUserBranchPartId });
                 entity.Property(e => e.Qty).IsRequired();
             });
 
@@ -83,18 +82,17 @@ namespace BomRepo.BRXXXXX.DL
 
             modelBuilder.Entity<ProjectEntity>(entity =>
             {
-                entity.HasKey(e => new { e.EntityId });
-                entity.HasKey(e => new { e.ProjectId });
-            });
-
-            modelBuilder.Entity<Assembly>(entity =>
-            {
-                entity.HasKey(e => new { e.Id });
+                entity.HasKey(e => new { e.EntityId, e.ProjectId });
             });
 
             modelBuilder.Entity<Part>(entity =>
             {
                 entity.HasKey(e => new { e.Id });
+            });
+
+            modelBuilder.Entity<PartPlacement>(entity => {
+                entity.HasKey(e => new { e.ParentPartId, e.ChildPartId });
+                entity.Property(e => e.Qty).IsRequired();
             });
         }
     }

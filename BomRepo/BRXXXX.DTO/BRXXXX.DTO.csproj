@@ -41,16 +41,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AssemblyDTO.cs" />
     <Compile Include="EntityDTO.cs" />
     <Compile Include="PartDTO.cs" />
-    <Compile Include="PartReferenceDTO.cs" />
     <Compile Include="ProjectDTO.cs" />
     <Compile Include="ProjectStatusDTO.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UserBranchAssemblyDTO.cs" />
-    <Compile Include="UserBranchAssemblyPartDTO.cs" />
+    <Compile Include="UserBranchPartDTO.cs" />
     <Compile Include="UserBranchDTO.cs" />
+    <Compile Include="PartPlacementDTO.cs" />
+    <Compile Include="PartsContainerDTO.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

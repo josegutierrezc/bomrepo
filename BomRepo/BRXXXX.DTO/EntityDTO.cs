@@ -11,6 +11,7 @@ namespace BomRepo.BRXXXXX.DL
         public string CreatedByUsername { get; set; }
         public DateTime? ModifiedOn { get; set; }
         public string ModifiedByUsername { get; set; }
+        public bool IsContainer { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public string NamePattern { get; set; }

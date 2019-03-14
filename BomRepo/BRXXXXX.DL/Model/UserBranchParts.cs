@@ -1,29 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 using FluentValidation;
 
 namespace BomRepo.BRXXXXX.DL
 {
-    public class Part
+    public partial class UserBranchPart
     {
         public int Id { get; set; }
         public DateTime CreatedOn { get; set; }
-        public string CreatedByUsername { get; set; }
-        public DateTime? ModifiedOn { get; set; }
-        public string ModifiedByUsername { get; set; }
-        public int ProjectId { get; set; }
+        public int UserBranchId { get; set; }
         public int EntityId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
     }
 
-    public class PartValidator : AbstractValidator<Part> {
-        public PartValidator() {
-            RuleFor(e => e.CreatedByUsername).NotNull().NotEmpty();
-            RuleFor(e => e.ProjectId).NotNull();
+    public class UserBranchPartValidator : AbstractValidator<UserBranchPart> {
+        public UserBranchPartValidator() {
+            RuleFor(e => e.UserBranchId).NotNull();
             RuleFor(e => e.EntityId).NotNull();
             RuleFor(e => e.Name).NotNull().NotEmpty();
+            RuleFor(e => e.UserBranchId).NotNull().NotEmpty();
         }
     }
 }

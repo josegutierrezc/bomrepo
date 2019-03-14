@@ -57,7 +57,7 @@ namespace REST.API.Controllers
             using (var db = new BRXXXXXModel(costumernumber))
             {
                 ProjectsManager proMan = new ProjectsManager(db);
-                return Mapper.Map<List<Project>, List<ProjectDTO>>(proMan.GetAll());
+                return Mapper.Map<List<Project>, List<ProjectDTO>>(proMan.GetAll() as List<Project>);
             }
         }
 
@@ -84,7 +84,7 @@ namespace REST.API.Controllers
             using (var db = new BRXXXXXModel(costumernumber))
             {
                 ProjectStatusesManager proMan = new ProjectStatusesManager(db);
-                return Mapper.Map<List<ProjectStatus>, List<ProjectStatusDTO>>(proMan.GetAll());
+                return Mapper.Map<List<ProjectStatus>, List<ProjectStatusDTO>>(proMan.GetAll() as List<ProjectStatus>);
             }
         }
 
@@ -114,54 +114,6 @@ namespace REST.API.Controllers
             }
         }
 
-
-        // GET api/v1/costumers/{costumernumber}/branches
-        [HttpPut("{costumernumber}/branches")]
-        public ActionResult<bool> PutAssembly(string costumernumber, [FromQuery]string username, [FromQuery]string projectnumber, [FromQuery]string assemblyname, [FromBody]List<UserBranchAssemblyPartDTO> partreferencesdto)
-        {
-            username = username == null ? string.Empty : username;
-            projectnumber = projectnumber == null ? string.Empty : projectnumber;
-
-            //Verify costumer exists
-            if (GetCostumer(costumernumber) == null) return NotFound(ErrorCatalog.CostumerDoesNotExist);
-
-            //Verify User exists
-            if (username == string.Empty)
-                return NotFound(ErrorCatalog.UserDoesNotExist);
-            else if (GetUser(username) == null) return NotFound(ErrorCatalog.UserDoesNotExist);
-
-            //Verify Project exists
-            if (projectnumber == string.Empty) return NotFound(ErrorCatalog.ProjectDoesNotExist);
-            Project project = GetProject(costumernumber, projectnumber);
-            if (project == null) return NotFound(ErrorCatalog.ProjectDoesNotExist);
-
-            using (var db = new BRXXXXXModel(costumernumber))
-            {
-                UserBranchesManager branchMan = new UserBranchesManager(db);
-
-                //Get userbranch, if it does not exist then create it
-                UserBranch userbranch = null;
-                var userbranches = branchMan.Get(username, projectnumber);
-                if (userbranches.Count() == 0)
-                {
-                    userbranch = branchMan.Add(new UserBranch()
-                    {
-                        Username = username,
-                        ProjectId = project.Id,
-                    });
-                }
-                else userbranch = userbranches[0];
-
-                //Push stuff
-                List<UserBranchAssemblyPart> partreferences = Mapper.Map<List<UserBranchAssemblyPartDTO>, List<UserBranchAssemblyPart>>(partreferencesdto);
-                bool result = branchMan.Commit(username, projectnumber, assemblyname, partreferences);
-
-                //Return
-                if (result) return Created(string.Empty, null); else return BadRequest();
-            }
-        }
-
-
         // POST api/v1/costumers/{costumernumber}/branches
         [HttpPost("{costumernumber}/branches")]
         public ActionResult<UserBranchDTO> PostBranch(string costumernumber, [FromBody] UserBranchDTO userbranch)
@@ -173,11 +125,177 @@ namespace REST.API.Controllers
                 if (userbranch.Username == null || userbranch.Username == string.Empty) return BadRequest("Username cannot be null or empty.");
 
                 UserBranchesManager branchMan = new UserBranchesManager(db);
-                UserBranch newbranch = branchMan.Add(Mapper.Map<UserBranchDTO, UserBranch>(userbranch));
-                if (branchMan.ErrorOccurred) return BadRequest(branchMan.ErrorDescription);
+                UserBranch newbranch = branchMan.Add(Mapper.Map<UserBranchDTO, UserBranch>(userbranch)) as UserBranch;
+                if (branchMan.ErrorOccurred) return BadRequest(branchMan.ErrorDefinition);
 
                 return Mapper.Map<UserBranch, UserBranchDTO>(newbranch);
             }
+        }
+        #endregion
+
+        #region UserBranchParts
+
+        /// <summary>
+        /// Get all container parts and its content for an specific user and project. If projecnumber is not assigned then
+        /// method will return all container parts and its content for all projects for this user.
+        /// </summary>
+        /// <param name="costumernumber">Required string indicating the costumer number</param>
+        /// <param name="username">Required string indicating the username</param>
+        /// <param name="projectnumber">No required string indicating the project number</param>
+        /// <returns></returns>
+        [HttpGet("{costumernumber}/branches/{username}")]
+        public ActionResult<List<PartsContainerDTO>> GetUserParts(string costumernumber, string username, [FromQuery]string projectnumber) {
+            if (GetCostumer(costumernumber) == null) return NotFound(ErrorCatalog.CostumerDoesNotExist);
+            if (GetUser(username) == null) return NotFound(ErrorCatalog.UserDoesNotExist);
+
+            projectnumber = projectnumber == null ? string.Empty : projectnumber;
+            if (projectnumber != string.Empty && GetProject(costumernumber, projectnumber) == null) return NotFound(ErrorCatalog.ProjectDoesNotExist);
+
+            using (var db = new BRXXXXXModel(costumernumber)) {
+                UserBranchPartsManager partMan = new UserBranchPartsManager(db);
+
+                //Get All container parts
+                List<PartsContainerDTO> result = new List<PartsContainerDTO>();
+                foreach (UserBranchPart container in partMan.GetContainers(username, projectnumber)) {
+                    PartsContainerDTO newdto = new PartsContainerDTO();
+                    newdto.ParentPartId = container.Id;
+                    newdto.ParentPartName = container.Name;
+                    newdto.Placements = new List<PartPlacementDTO>();
+                    foreach (KeyValuePair<int, UserBranchPart> kvp in partMan.GetPartPlacements(container.Id))
+                        newdto.Placements.Add(new PartPlacementDTO() { PartId = kvp.Value.Id, PartName = kvp.Value.Name, Qty = kvp.Key });
+                    result.Add(newdto);
+                }
+                
+                return Ok(result);
+            }
+        }
+
+        /// <summary>
+        /// Add a container part and its content to a user and project branch. If container exists then it
+        /// and all placements will be replaced for this new commit.
+        /// </summary>
+        /// <param name="costumernumber">Required string indicating the costumer number</param>
+        /// <param name="username">Required string indicating the username</param>
+        /// <param name="projectnumber">Required string indicating the project number</param>
+        /// <param name="dto">Required object of type PartsContainerDTO</param>
+        /// <returns></returns>
+        [HttpPost("{costumernumber}/branches/{username}")]
+        public ActionResult PostUserPart(string costumernumber, string username, [FromQuery] string projectnumber, [FromBody] PartsContainerDTO dto)
+        {
+            if (GetCostumer(costumernumber) == null) return NotFound(ErrorCatalog.CostumerDoesNotExist);
+            if (GetUser(username) == null) return NotFound(ErrorCatalog.UserDoesNotExist);
+            if (GetProject(costumernumber, projectnumber) == null) return NotFound(ErrorCatalog.ProjectDoesNotExist);
+            if (dto == null) return BadRequest(ErrorCatalog.CreateFrom(ErrorCatalog.ValidationFailed, "PartsContainerDTO object is required"));
+            
+            using (var db = new BRXXXXXModel(costumernumber))
+            {
+                //Prepare manager
+                UserBranchesManager branchMan = new UserBranchesManager(db);
+                UserBranchPartsManager partMan = new UserBranchPartsManager(db);
+                UserBranchPartPlacementsManager placeMan = new UserBranchPartPlacementsManager(db);
+
+                //Get User branches
+                List<UserBranch> userbranches = branchMan.Get(username, projectnumber) as List<UserBranch>;
+                if (userbranches.Count() == 0) return BadRequest(ErrorCatalog.CreateFrom(ErrorCatalog.ValidationFailed, "A branch with the submitted username and projectnumber does not exist"));
+
+                //Get User branch
+                UserBranch userbranch = userbranches[0];
+
+                //Add parent
+                UserBranchPart parent = new UserBranchPart();
+                parent.EntityId = -1;
+                parent.UserBranchId = userbranch.Id;
+                parent.Name = dto.ParentPartName;
+                parent.Description = string.Empty;
+                parent = partMan.Add(parent) as UserBranchPart;
+                if (parent == null) return BadRequest(partMan.ErrorDefinition);
+
+                //Verify parent is container
+                if (!partMan.IsContainerPart(parent.Id)) return BadRequest(ErrorCatalog.CreateFrom(ErrorCatalog.ValidationFailed, "A container part is required in UserBranchPart.Parent"));
+
+                //Remove all existing placements
+                bool removed = placeMan.RemoveAll(parent.Id);
+
+                //Add Placements
+                List<UserBranchPartPlacement> placements = new List<UserBranchPartPlacement>();
+                foreach (PartPlacementDTO pp in dto.Placements)
+                {
+                    //Add part to db
+                    UserBranchPart child = partMan.Add(new UserBranchPart()
+                    {
+                        UserBranchId = parent.UserBranchId,
+                        EntityId = -1,
+                        Name = pp.PartName,
+                        Description = string.Empty
+                    }) as UserBranchPart;
+                    if (child == null) return BadRequest(partMan.ErrorDefinition);
+
+                    //Add placement to list
+                    placements.Add(new UserBranchPartPlacement()
+                    {
+                        UserBranchId = parent.UserBranchId,
+                        ParentUserBranchPartId = parent.Id,
+                        ChildUserBranchPartId = child.Id,
+                        Qty = pp.Qty
+                    });
+                }
+                bool added = placeMan.Add(placements);
+
+                //Return data
+                return Ok();
+            }
+        }
+
+        /// <summary>
+        /// Push all user parts related with the specified project to the main branch. Once done, user project branch will be cleaned.
+        /// </summary>
+        /// <param name="costumernumber">Required string indicating the costumer number</param>
+        /// <param name="username">REquired string indicating the username</param>
+        /// <param name="projectnumber">Required string indicating the project number</param>
+        /// <returns></returns>
+        [HttpPut("{costumernumber}/branches/{username}")]
+        public ActionResult PutUserParts(string costumernumber, string username, [FromQuery] string projectnumber) {
+            if (GetCostumer(costumernumber) == null) return NotFound(ErrorCatalog.CostumerDoesNotExist);
+            if (GetUser(username) == null) return NotFound(ErrorCatalog.UserDoesNotExist);
+
+            Project project = GetProject(costumernumber, projectnumber);
+            if (project == null) return NotFound(ErrorCatalog.ProjectDoesNotExist);
+
+            using (var db = new BRXXXXXModel(costumernumber)) {
+                UserBranchPartsManager usersPartMan = new UserBranchPartsManager(db);
+                PartsManager partsMan = new PartsManager(db);
+
+                //Get All containers for this user and project
+                foreach (UserBranchPart container in usersPartMan.GetContainers(username, projectnumber)) {
+                    //Add the part to the main branch
+                    Part newcontainerpart = partsMan.Add(new Part() {
+                        CreatedOn = container.CreatedOn,
+                        CreatedByUsername = username,
+                        ModifiedByUsername = username, //Required in case part exists already
+                        ProjectId = project.Id,
+                        EntityId = container.EntityId,
+                        Name = container.Name,
+                        Description = container.Description
+                    }) as Part;
+                    if (newcontainerpart == null) return BadRequest(partsMan.ErrorDefinition);
+
+                    //Get all placements
+                    foreach (KeyValuePair<int, UserBranchPart> kvp in usersPartMan.GetPartPlacements(container.Id)) {
+                        //Add part
+                        Part part = partsMan.Add(new Part() {
+                            CreatedOn = kvp.Value.CreatedOn,
+                            CreatedByUsername = username,
+                            ModifiedByUsername = username,
+                            ProjectId = project.Id,
+                            EntityId = kvp.Value.EntityId,
+                            Name = kvp.Value.Name,
+                            Description = kvp.Value.Description
+                        }) as Part;
+                    }
+                }
+            }
+            
+            return Ok();
         }
 
         #endregion
@@ -186,27 +304,63 @@ namespace REST.API.Controllers
 
         // GET api/v1/costumers/{costumernumber}/entities}
         [HttpGet("{costumernumber}/entities")]
-        public ActionResult<List<ProjectDTO>> GetEntities(string costumernumber)
+        public ActionResult<List<EntityDTO>> GetEntities(string costumernumber, [FromQuery]string projectnumber)
         {
             if (GetCostumer(costumernumber) == null) return NotFound(ErrorCatalog.CostumerDoesNotExist);
             using (var db = new BRXXXXXModel(costumernumber))
             {
                 EntitiesManager entMan = new EntitiesManager(db);
-                return Ok(Mapper.Map < List<Entity>, List<EntityDTO>>(entMan.GetAll()));
+                if (projectnumber == null)
+                    return Ok(Mapper.Map<List<Entity>, List<EntityDTO>>(entMan.GetAll() as List<Entity>));
+                else
+                    return Ok(Mapper.Map<List<Entity>, List<EntityDTO>>(entMan.GetByProject(projectnumber)));
             }
         }
 
-        // POST api/v1/costumers/{costumernumber}/entities}
+        // POST api/v1/costumers/{costumernumber}/entities
         [HttpPost("{costumernumber}/entities")]
-        public ActionResult<List<ProjectDTO>> PostEntity(string costumernumber, [FromBody]EntityDTO dto)
+        public ActionResult PostEntity(string costumernumber, [FromBody]EntityDTO dto)
+        {
+            if (GetCostumer(costumernumber) == null) return NotFound(ErrorCatalog.CostumerDoesNotExist);
+            if (GetUser(dto.CreatedByUsername) == null) return NotFound(ErrorCatalog.UserDoesNotExist);
+            using (var db = new BRXXXXXModel(costumernumber))
+            {
+                EntitiesManager entMan = new EntitiesManager(db);
+                Entity result = entMan.Add(Mapper.Map<EntityDTO, Entity>(dto)) as Entity;
+
+                if (result == null) return BadRequest(entMan.ErrorDefinition);
+
+                return Ok();
+            }
+        }
+
+        // POST api/v1/costumers/{costumernumber}/entities/entityid
+        [HttpGet("{costumernumber}/entities/{entityid:int}")]
+        public ActionResult<EntityDTO> GetEntity(string costumernumber, int entityid)
         {
             if (GetCostumer(costumernumber) == null) return NotFound(ErrorCatalog.CostumerDoesNotExist);
             using (var db = new BRXXXXXModel(costumernumber))
             {
                 EntitiesManager entMan = new EntitiesManager(db);
-                bool result = entMan.Add(Mapper.Map<EntityDTO, Entity>(dto));
+                Entity entity = entMan.Get(entityid) as Entity;
 
-                if (!result) return BadRequest(entMan.ErrorDescription);
+                if (entity == null) return NotFound(ErrorCatalog.EntityDoesNotExist);
+
+                return Ok(Mapper.Map<Entity, EntityDTO>(entity));
+            }
+        }
+
+        // POST api/v1/costumers/{costumernumber}/entities/entityid
+        [HttpDelete("{costumernumber}/entities/{entityid}")]
+        public ActionResult DeleteEntity(string costumernumber, int entityid)
+        {
+            if (GetCostumer(costumernumber) == null) return NotFound(ErrorCatalog.CostumerDoesNotExist);
+            using (var db = new BRXXXXXModel(costumernumber))
+            {
+                EntitiesManager entMan = new EntitiesManager(db);
+                bool deleted = entMan.Remove(entityid);
+
+                if (!deleted) return NotFound(ErrorCatalog.EntityDoesNotExist);
 
                 return Ok();
             }

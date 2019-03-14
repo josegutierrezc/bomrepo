@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BRXXXX.DTO
+namespace BomRepo.BRXXXXX.DTO
 {
     public class PartDTO
     {

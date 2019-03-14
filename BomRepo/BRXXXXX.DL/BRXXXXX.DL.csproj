@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EntityNamePattern\EntityNamePattern.csproj" />
+    <ProjectReference Include="..\ErrorsCatalog\ErrorsCatalog.csproj" />
   </ItemGroup>
 
 </Project>

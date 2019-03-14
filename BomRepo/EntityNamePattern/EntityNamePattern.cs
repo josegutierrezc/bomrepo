@@ -8,24 +8,22 @@ namespace BomRepo.EntityNamePattern
 {
     public static class EntityNamePattern
     {
-        public static string GetFromName(string partname)
-        {
-            string pattern = string.Empty;
-            foreach (char c in partname)
-            {
-                if (char.IsNumber(c))
-                    pattern += "#";
-                else if (char.IsLetter(c))
-                    pattern += "@";
-                else
-                    pattern += c;
-            }
-            return pattern;
-        }
-
         public static bool MatchPattern(string pattern, string partname) {
-            string partnamepattern = GetFromName(partname);
-            return pattern == partnamepattern;
+            if (partname.Length != pattern.Length) return false;
+
+            partname = partname.ToUpper();
+            pattern = pattern.ToUpper();
+            for (int i = 0; i <= partname.Length - 1; i++) {
+                if (pattern[i] == '@')
+                {
+                    if (!char.IsLetter(partname[i])) return false;
+                }
+                else if (pattern[i] == '#') {
+                    if (!char.IsNumber(partname[i])) return false;
+                }
+                else if (partname[i] != pattern[i]) return false;
+            }
+            return true;
         }
     }
 }
