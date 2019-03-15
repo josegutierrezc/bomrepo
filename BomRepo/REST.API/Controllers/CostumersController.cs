@@ -184,7 +184,10 @@ namespace REST.API.Controllers
         {
             if (GetCostumer(costumernumber) == null) return NotFound(ErrorCatalog.CostumerDoesNotExist);
             if (GetUser(username) == null) return NotFound(ErrorCatalog.UserDoesNotExist);
-            if (GetProject(costumernumber, projectnumber) == null) return NotFound(ErrorCatalog.ProjectDoesNotExist);
+
+            Project project = GetProject(costumernumber, projectnumber);
+            if (project == null) return NotFound(ErrorCatalog.ProjectDoesNotExist);
+
             if (dto == null) return BadRequest(ErrorCatalog.CreateFrom(ErrorCatalog.ValidationFailed, "PartsContainerDTO object is required"));
             
             using (var db = new BRXXXXXModel(costumernumber))
@@ -195,11 +198,17 @@ namespace REST.API.Controllers
                 UserBranchPartPlacementsManager placeMan = new UserBranchPartPlacementsManager(db);
 
                 //Get User branches
+                UserBranch userbranch = null;
                 List<UserBranch> userbranches = branchMan.Get(username, projectnumber) as List<UserBranch>;
-                if (userbranches.Count() == 0) return BadRequest(ErrorCatalog.CreateFrom(ErrorCatalog.ValidationFailed, "A branch with the submitted username and projectnumber does not exist"));
-
-                //Get User branch
-                UserBranch userbranch = userbranches[0];
+                if (userbranches.Count() == 0) {
+                    //Create one
+                    userbranch = branchMan.Add(new UserBranch()
+                    {
+                        Username = username,
+                        ProjectId = project.Id,
+                    }) as UserBranch;
+                }
+                else userbranch = userbranches[0];
 
                 //Add parent
                 UserBranchPart parent = new UserBranchPart();
@@ -211,7 +220,11 @@ namespace REST.API.Controllers
                 if (parent == null) return BadRequest(partMan.ErrorDefinition);
 
                 //Verify parent is container
-                if (!partMan.IsContainerPart(parent.Id)) return BadRequest(ErrorCatalog.CreateFrom(ErrorCatalog.ValidationFailed, "A container part is required in UserBranchPart.Parent"));
+                if (!partMan.IsContainerPart(parent.Id)) {
+                    ErrorDefinition newerror = ErrorCatalog.CreateFrom(ErrorCatalog.ContainerPartRequired, string.Empty);
+                    newerror.ReplaceParameterValueInUserDescription("@1", parent.Name);
+                    return BadRequest(newerror);
+                }
 
                 //Remove all existing placements
                 bool removed = placeMan.RemoveAll(parent.Id);
@@ -220,6 +233,13 @@ namespace REST.API.Controllers
                 List<UserBranchPartPlacement> placements = new List<UserBranchPartPlacement>();
                 foreach (PartPlacementDTO pp in dto.Placements)
                 {
+                    //Verify if part has the same name of its parent
+                    if (pp.PartName.ToUpper() == parent.Name) {
+                        ErrorDefinition newerror = ErrorCatalog.CreateFrom(ErrorCatalog.SelfContainedError, string.Empty);
+                        newerror.ReplaceParameterValueInUserDescription("@1", parent.Name);
+                        return BadRequest(newerror);
+                    }
+
                     //Add part to db
                     UserBranchPart child = partMan.Add(new UserBranchPart()
                     {
@@ -264,6 +284,7 @@ namespace REST.API.Controllers
             using (var db = new BRXXXXXModel(costumernumber)) {
                 UserBranchPartsManager usersPartMan = new UserBranchPartsManager(db);
                 PartsManager partsMan = new PartsManager(db);
+                PartPlacementsManager placeMan = new PartPlacementsManager(db);
 
                 //Get All containers for this user and project
                 foreach (UserBranchPart container in usersPartMan.GetContainers(username, projectnumber)) {
@@ -280,18 +301,39 @@ namespace REST.API.Controllers
                     if (newcontainerpart == null) return BadRequest(partsMan.ErrorDefinition);
 
                     //Get all placements
+                    List<PartPlacement> placements = new List<PartPlacement>();
                     foreach (KeyValuePair<int, UserBranchPart> kvp in usersPartMan.GetPartPlacements(container.Id)) {
                         //Add part
                         Part part = partsMan.Add(new Part() {
                             CreatedOn = kvp.Value.CreatedOn,
                             CreatedByUsername = username,
-                            ModifiedByUsername = username,
+                            ModifiedByUsername = username, //Required in case part exist already
                             ProjectId = project.Id,
                             EntityId = kvp.Value.EntityId,
                             Name = kvp.Value.Name,
                             Description = kvp.Value.Description
                         }) as Part;
+                        if (part == null) return BadRequest(partsMan.ErrorDefinition);
+
+                        //Add placement
+                        PartPlacement placement = new PartPlacement() {
+                            ParentPartId = newcontainerpart.Id,
+                            ChildPartId = part.Id,
+                            Qty = kvp.Key
+                        };
+                        placements.Add(placement);
                     }
+
+                    //Add placements
+                    bool added = placeMan.Add(placements);
+                    if (!added) return BadRequest(placeMan.ErrorDefinition);
+                }
+
+                //If everything went well ... and at this point it make sense then remove everything
+                UserBranchPartPlacementsManager userPlaceMan = new UserBranchPartPlacementsManager(db);
+                foreach (UserBranchPart container in usersPartMan.GetContainers(username, projectnumber)) {
+                    userPlaceMan.RemoveAll(container.Id);
+                    usersPartMan.Remove(container.Id);
                 }
             }
             

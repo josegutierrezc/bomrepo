@@ -83,7 +83,7 @@ namespace BomRepo.BRXXXXX.DL
         public bool Add(List<PartPlacement> placements)
         {
             foreach (PartPlacement placement in placements)
-                db.UserBranchPartPlacements.Add(placement);
+                db.PartPlacements.Add(placement);
             db.SaveChanges();
             return true;
         }

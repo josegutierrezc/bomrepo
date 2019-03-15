@@ -61,14 +61,14 @@ namespace BomRepo.Autocad.API
 
             return IsValidPartName(PartReferenceName);
         }
-        public static KeyValuePair<string, PartReferenceDTO> CreatePartReferenceFromPartReferenceName(string PartReferenceName)
+        public static KeyValuePair<string, PartPlacementDTO> CreatePartReferenceFromPartReferenceName(string PartReferenceName)
         {
             //Convert to upper
             PartReferenceName = PartReferenceName.ToUpper();
 
             //Validate part reference name
             KeyValuePair<bool, string> partReferenceNameValidationResult = IsValidPartReferenceName(PartReferenceName);
-            if (!partReferenceNameValidationResult.Key) return new KeyValuePair<string, PartReferenceDTO>(PartReferenceName + " " + partReferenceNameValidationResult.Value, null);
+            if (!partReferenceNameValidationResult.Key) return new KeyValuePair<string, PartPlacementDTO>(PartReferenceName + " " + partReferenceNameValidationResult.Value, null);
 
             //Get quantity
             int qty = 0;
@@ -79,19 +79,19 @@ namespace BomRepo.Autocad.API
             {
                 string qtyStr = PartReferenceName.Substring(1, indexOfCloseP - 1);
                 if (!int.TryParse(qtyStr, out qty))
-                    return new KeyValuePair<string, PartReferenceDTO>(ErrorCatalog.IntegerNumberRequiredInQuantity.GetUserDescription(), null);
+                    return new KeyValuePair<string, PartPlacementDTO>(ErrorCatalog.IntegerNumberRequiredInQuantity.GetUserDescription(), null);
                 PartReferenceName = PartReferenceName.Remove(0, indexOfCloseP + 1);
             }
 
             //Create PartReference object
-            PartReferenceDTO reference = new PartReferenceDTO();
-            reference.Name = PartReferenceName;
+            PartPlacementDTO reference = new PartPlacementDTO();
+            reference.PartName = PartReferenceName;
             reference.Qty = qty;
 
             //return object
-            return new KeyValuePair<string, PartReferenceDTO>(string.Empty, reference);
+            return new KeyValuePair<string, PartPlacementDTO>(string.Empty, reference);
         }
-        public static KeyValuePair<bool, string> InsertAssemblyCountTable(Database DB, string AssemblyName, List<PartReferenceDTO> Parts)
+        public static KeyValuePair<bool, string> InsertAssemblyCountTable(Database DB, string AssemblyName, List<PartPlacementDTO> Parts)
         {
             return new KeyValuePair<bool, string>(true, string.Empty);
         }
@@ -148,9 +148,9 @@ namespace BomRepo.Autocad.API
                 acTrans.Commit();
             }
         }
-        public static KeyValuePair<List<string>, SortedDictionary<string, PartReferenceDTO>> GetPartReferencesFromSelection(Database acDb, SelectionSet Selection)
+        public static KeyValuePair<List<string>, SortedDictionary<string, PartPlacementDTO>> GetPartReferencesFromSelection(Database acDb, SelectionSet Selection)
         {
-            SortedDictionary<string, PartReferenceDTO> dictAssemblyParts = new SortedDictionary<string, PartReferenceDTO>();
+            SortedDictionary<string, PartPlacementDTO> dictAssemblyParts = new SortedDictionary<string, PartPlacementDTO>();
             List<string> errorLog = new List<string>();
             using (Transaction acTrans = acDb.TransactionManager.StartTransaction())
             {
@@ -173,21 +173,21 @@ namespace BomRepo.Autocad.API
                     }
 
                     //Get PartReference object and add it to the collection if part reference name is valid or add error in log if it is not valid
-                    KeyValuePair<string, PartReferenceDTO> result = CreatePartReferenceFromPartReferenceName(partReferenceName);
+                    KeyValuePair<string, PartPlacementDTO> result = CreatePartReferenceFromPartReferenceName(partReferenceName);
                     if (result.Value == null)
                         errorLog.Add(result.Key);
                     else
                     {
-                        if (dictAssemblyParts.ContainsKey(result.Value.Name))
-                            dictAssemblyParts[result.Value.Name].Qty += result.Value.Qty;
+                        if (dictAssemblyParts.ContainsKey(result.Value.PartName))
+                            dictAssemblyParts[result.Value.PartName].Qty += result.Value.Qty;
                         else
-                            dictAssemblyParts.Add(result.Value.Name, result.Value);
+                            dictAssemblyParts.Add(result.Value.PartName, result.Value);
                     }
                 }
 
                 acTrans.Commit();
             }
-            return new KeyValuePair<List<string>, SortedDictionary<string, PartReferenceDTO>>(errorLog, dictAssemblyParts);
+            return new KeyValuePair<List<string>, SortedDictionary<string, PartPlacementDTO>>(errorLog, dictAssemblyParts);
         }
         public static void ShowCommandLineMessage(string[] Messages) {
             //Prepares editor
@@ -199,7 +199,6 @@ namespace BomRepo.Autocad.API
             MessageBoxIcon icon = Error.Classification == ErrorDefinitionClassification.Critical ? MessageBoxIcon.Error : Error.Classification == ErrorDefinitionClassification.Warning ? MessageBoxIcon.Warning : Error.Classification == ErrorDefinitionClassification.Informational ? MessageBoxIcon.Information : MessageBoxIcon.Asterisk;
             MessageBox.Show(Error.UserDescription, "BomRepo " + Error.Code + ": " + Error.Title, MessageBoxButtons.OK, icon);
         }
-
         public static async Task<ProjectDTO> SelectProject(string CostumerNumber, ProjectDTO SelectedProject) {
             //Get List of Projects
             List<ProjectDTO> projects = await BomRepoServiceClient.Instance.GetProjects(CostumerNumber);

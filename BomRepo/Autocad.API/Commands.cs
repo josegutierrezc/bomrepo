@@ -190,9 +190,9 @@ namespace BomRepo.Autocad.API
             }
 
             //Get PartReferences from selection set
-            KeyValuePair<List<string>, SortedDictionary<string, PartReferenceDTO>> partReferences = AutocadHelper.GetPartReferencesFromSelection(acDb, promptSelectionResult.Value);
+            KeyValuePair<List<string>, SortedDictionary<string, PartPlacementDTO>> partReferences = AutocadHelper.GetPartReferencesFromSelection(acDb, promptSelectionResult.Value);
             List<string> errorLog = partReferences.Key;
-            SortedDictionary<string, PartReferenceDTO> dictAssemblyParts = partReferences.Value;
+            SortedDictionary<string, PartPlacementDTO> dictAssemblyParts = partReferences.Value;
 
             //Show errors and stop execution in case errors were found
             if (errorLog.Count != 0)
@@ -214,9 +214,9 @@ namespace BomRepo.Autocad.API
             List<string[]> data = new List<string[]>();
 
             int totalCount = 0;
-            foreach (KeyValuePair<string, PartReferenceDTO> kvp in dictAssemblyParts)
+            foreach (KeyValuePair<string, PartPlacementDTO> kvp in dictAssemblyParts)
             {
-                data.Add(new string[2] { kvp.Value.Qty.ToString(), kvp.Value.Name });
+                data.Add(new string[2] { kvp.Value.Qty.ToString(), kvp.Value.PartName });
                 totalCount += kvp.Value.Qty;
             }
             data.Add(new string[2] { totalCount.ToString(), "TOTAL COUNT" });
@@ -315,9 +315,9 @@ namespace BomRepo.Autocad.API
             }
 
             //Get PartReferences from selection set
-            KeyValuePair<List<string>, SortedDictionary<string, PartReferenceDTO>> partReferences = AutocadHelper.GetPartReferencesFromSelection(acDb, promptSelectionResult.Value);
+            KeyValuePair<List<string>, SortedDictionary<string, PartPlacementDTO>> partReferences = AutocadHelper.GetPartReferencesFromSelection(acDb, promptSelectionResult.Value);
             List<string> errorLog = partReferences.Key;
-            SortedDictionary<string, PartReferenceDTO> dictAssemblyParts = partReferences.Value;
+            SortedDictionary<string, PartPlacementDTO> dictAssemblyParts = partReferences.Value;
 
             //Show errors and stop execution in case errors were found
             if (errorLog.Count != 0)
@@ -331,7 +331,8 @@ namespace BomRepo.Autocad.API
             acEditor.WriteMessage("Object were successfully selected \n\r");
 
             //Transmit data to repository
-
+            pushform form = new pushform(connecteduser.Costumers[0].Number, connecteduser.Username, selectedproject, assemblyName, dictAssemblyParts);
+            if (form.ShowDialog() != DialogResult.OK) return;
 
             //Ask for Table insertion point
             PromptPointResult promptPointResult = acEditor.GetPoint("Select the point to insert the parts table");
@@ -342,9 +343,9 @@ namespace BomRepo.Autocad.API
             List<string[]> data = new List<string[]>();
 
             int totalCount = 0;
-            foreach (KeyValuePair<string, PartReferenceDTO> kvp in dictAssemblyParts)
+            foreach (KeyValuePair<string, PartPlacementDTO> kvp in dictAssemblyParts)
             {
-                data.Add(new string[2] { kvp.Value.Qty.ToString(), kvp.Value.Name });
+                data.Add(new string[2] { kvp.Value.Qty.ToString(), kvp.Value.PartName });
                 totalCount += kvp.Value.Qty;
             }
             data.Add(new string[2] { totalCount.ToString(), "TOTAL COUNT" });
@@ -360,7 +361,6 @@ namespace BomRepo.Autocad.API
             //Show successful message
             acEditor.WriteMessage("\n\r" + dictAssemblyParts.Count.ToString() + " unique part(s) was/were found. " + totalCount.ToString() + " total part(s) was/were count.\n\r");
             acEditor.WriteMessage("BRPUSH successfully executed.\n\r");
-
         }
 
         /// <summary>

@@ -44,7 +44,8 @@ namespace BomRepo.BRXXXXX.DL
 
                 if (ent == null)
                 {
-                    errorDefinition = ErrorCatalog.CreateFrom(ErrorCatalog.ValidationFailed, "No entity which name pattern match with part name was found");
+                    errorDefinition = ErrorCatalog.WrongPartName;
+                    errorDefinition.ReplaceParameterValueInUserDescription("@1", userpart.Name.ToUpper());
                     return null;
                 }
             }
@@ -60,7 +61,8 @@ namespace BomRepo.BRXXXXX.DL
                 //Validate part name
                 if (!EntityNamePattern.EntityNamePattern.MatchPattern(ent.NamePattern, userpart.Name))
                 {
-                    errorDefinition = ErrorCatalog.CreateFrom(ErrorCatalog.ValidationFailed, "User part name does not match with entity name pattern");
+                    errorDefinition = ErrorCatalog.WrongPartName;
+                    errorDefinition.ReplaceParameterValueInUserDescription("@1", userpart.Name.ToUpper());
                     return null;
                 }
             }

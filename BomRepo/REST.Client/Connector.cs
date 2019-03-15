@@ -153,6 +153,66 @@ namespace BomRepo.REST.Client
             return null;
         }
 
+        /// <summary>
+        /// Push a container and its content to the user project branch. If a container with the same name already exists the
+        /// it will be replaced by this one.
+        /// </summary>
+        /// <param name="costumernumber">Required string indicating costumer number</param>
+        /// <param name="username">Required string indicating username</param>
+        /// <param name="projectnumber">Required string indicating project number</param>
+        /// <param name="containername">Required string indicating the name of the container</param>
+        /// <param name="parts">Required list of PartPlacementDTO object</param>
+        /// <returns></returns>
+        public async Task<bool> PushContainer(string costumernumber, string username, string projectnumber, string containername, List<PartPlacementDTO> parts) {
+            //Initialize communication and get authentication header
+            string authHeader = await InitializeCommunication();
+
+            //If something happen then return null and lets the external user take care of the error.
+            if (ErrorOccurred) return false;
+
+            //Prepare data to transmit
+            PartsContainerDTO container = new PartsContainerDTO();
+            container.ParentPartName = containername;
+            container.Placements = parts;
+
+            //If everything goes well then lets try to get the data from the service with the authorization header obtained from the InitializationMethod
+            //Define the total of requests we can send to the service, if token is valid only one will be needed. If token is invalid then two
+            //If at the second request we get no positive response then something is happening with the service or credentials are
+            //incorrect, in this case change the latesterrordefinition indicating that
+            string url = "api/v1/costumers/" + costumernumber + "/branches/" + username + "?projectnumber=" + projectnumber;
+            var jsonData = JsonConvert.SerializeObject(container);
+            using (HttpContent content = new StringContent(jsonData))
+            {
+                content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                int requests = 1;
+                while (requests <= 2)
+                {
+                    HttpResponseMessage response = null;
+                    using (var client = new BomRepoHttpClient("application/json", authHeader))
+                    {
+                        response = await client.PostAsync(url, content);
+                        if (response.IsSuccessStatusCode)
+                        {
+                            latestErrorDefinition = null;
+                            return true;
+                        }
+                        else if (response.StatusCode != System.Net.HttpStatusCode.Unauthorized)
+                        {
+                            jsonData = response.Content.ReadAsStringAsync().Result;
+                            latestErrorDefinition = JsonConvert.DeserializeObject<ErrorDefinition>(jsonData);
+                            return false;
+                        }
+                    }
+
+                    if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized) authHeader = await RefreshToken();
+                    requests += 1;
+                }
+            }
+
+            latestErrorDefinition = ErrorCatalog.ServiceUnavailableOrInvalidCredentials;
+            return false;
+        }
+
         #region Helpers
         /// <summary>
         /// Initializes internal flags before start communicating with the service

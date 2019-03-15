@@ -27,7 +27,10 @@ namespace BomRepo.ErrorsCatalog
         public static ErrorDefinition CostumerDoesNotExist = new ErrorDefinition("REST.API.103", "Costumer does not exist", ErrorDefinitionClassification.Warning, "Costumer does not exist.", "Costumer number was not found in database.", true);
         public static ErrorDefinition UserDoesNotExist = new ErrorDefinition("REST.API.104", "User does not exist", ErrorDefinitionClassification.Warning, "User does not exist.", "User was not found in database.", true);
         public static ErrorDefinition EntityDoesNotExist = new ErrorDefinition("REST.API.105", "Entity does not exist", ErrorDefinitionClassification.Warning, "Entity does not exist.", "General Entity was not found in database.", true);
-        public static ErrorDefinition ValidationFailed = new ErrorDefinition("BRXXXXXX.101", "Validation fail", ErrorDefinitionClassification.Critical, "Validation fail", string.Empty, true); //User this definition to return validation errors in all BRXXXXXX managers.
+        public static ErrorDefinition ValidationFailed = new ErrorDefinition("BRX.101", "Validation fail", ErrorDefinitionClassification.Critical, "Validation fail", string.Empty, true); //Use this definition to return validation errors in all BRXXXXXX managers.
+        public static ErrorDefinition WrongPartName = new ErrorDefinition("BRX.102", "Wrong part name", ErrorDefinitionClassification.Warning, "Part @1 is not written correctly. No part definition was found with this pattern.", string.Empty, false);
+        public static ErrorDefinition SelfContainedError = new ErrorDefinition("BRX.103", "Container pointing to itself", ErrorDefinitionClassification.Warning, "Container @1 cannot be part of its own content.", string.Empty, false);
+        public static ErrorDefinition ContainerPartRequired = new ErrorDefinition("BRX.104", "Container part required", ErrorDefinitionClassification.Warning, "A container part is required and @1 is not.", string.Empty, false);
         public static ErrorDefinition CreateFrom(ErrorDefinition Definition, string DeveloperDescription) {
             return new ErrorDefinition(Definition.Code, Definition.Title, Definition.Classification, Definition.UserDescription, DeveloperDescription, Definition.OnlyForDeveloperEye);
         }
@@ -58,6 +61,9 @@ namespace BomRepo.ErrorsCatalog
         public string GetUserDescription()
         {
             return "Error " + Code + " " + Title + ": " + UserDescription + "\n\r";
+        }
+        public void ReplaceParameterValueInUserDescription(string Parameter, string Value) {
+            UserDescription = UserDescription.Replace(Parameter, Value);
         }
     }
 }
