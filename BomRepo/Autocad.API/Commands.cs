@@ -298,7 +298,8 @@ namespace BomRepo.Autocad.API
             if (promptSelectionResult.Status != PromptStatus.OK) return;
 
             //Initialize variables
-            string assemblyName = string.Empty;
+            PartPlacementDTO cadcontainer = new PartPlacementDTO();
+            cadcontainer.PartProperties = new List<PartPropertyDTO>();
 
             //Get Database object
             Database acDb = acadApp.DocumentManager.CurrentDocument.Database;
@@ -311,16 +312,16 @@ namespace BomRepo.Autocad.API
                 if (entity is DBText)
                 {
                     DBText dbText = acTrans.GetObject(promptAssemblyResult.ObjectId, OpenMode.ForRead) as DBText;
-                    assemblyName = dbText.TextString.ToUpper();
+                    cadcontainer.PartName = dbText.TextString.ToUpper();
                 }
                 else
                 {
                     MText mText = acTrans.GetObject(promptAssemblyResult.ObjectId, OpenMode.ForRead) as MText;
-                    assemblyName = mText.Text;
+                    cadcontainer.PartName = mText.Text;
                 }
 
                 //Validate assembly name
-                KeyValuePair<bool, string> assemblyNameValidationResult = AutocadHelper.IsValidPartName(assemblyName);
+                KeyValuePair<bool, string> assemblyNameValidationResult = AutocadHelper.IsValidPartName(cadcontainer.PartName);
                 if (!assemblyNameValidationResult.Key)
                 {
                     acEditor.WriteMessage(assemblyNameValidationResult.Value);
@@ -328,8 +329,8 @@ namespace BomRepo.Autocad.API
                 }
                 else
                 {
-                    assemblyName = assemblyName.ToUpper();
-                    acEditor.WriteMessage("Assembly name: " + assemblyName + "\n\r");
+                    cadcontainer.PartName = cadcontainer.PartName.ToUpper();
+                    acEditor.WriteMessage("Assembly name: " + cadcontainer.PartName + "\n\r");
                 }
 
                 acTrans.Commit();
@@ -362,7 +363,7 @@ namespace BomRepo.Autocad.API
             }
 
             //Transmit data to repository
-            pushform form = new pushform(connecteduser.Costumers[0].Number, connecteduser.Username, selectedproject, assemblyName, dictAssemblyParts);
+            pushform form = new pushform(connecteduser.Costumers[0].Number, connecteduser.Username, selectedproject, cadcontainer, dictAssemblyParts);
             if (form.ShowDialog() != DialogResult.OK) return;
 
             //Ask for Table insertion point
@@ -387,7 +388,7 @@ namespace BomRepo.Autocad.API
             CellAlignment[] dataColumnAlignment = new CellAlignment[2] { CellAlignment.MiddleCenter, CellAlignment.MiddleLeft };
 
             //Insert Table
-            AutocadHelper.InsertTable(acDb, promptPointResult.Value, assemblyName, header, data, titleAlignment, headerAlignment, dataColumnAlignment);
+            AutocadHelper.InsertTable(acDb, promptPointResult.Value, cadcontainer.PartName, header, data, titleAlignment, headerAlignment, dataColumnAlignment);
 
             //Show successful message
             acEditor.WriteMessage("\n\r" + dictAssemblyParts.Count.ToString() + " unique part(s) was/were found. " + totalCount.ToString() + " total part(s) was/were count.\n\r");
