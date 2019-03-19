@@ -213,6 +213,147 @@ namespace BomRepo.REST.Client
             return false;
         }
 
+        /// <summary>
+        /// Get all parts from user repository
+        /// </summary>
+        /// <param name="costumernumber">Required string indicating costumer number</param>
+        /// <param name="username">Required string indicating username</param>
+        /// <param name="projectnumber">Required string indicating projectnumber</param>
+        /// <returns></returns>
+        public async Task<List<PartsContainerDTO>> GetUserRepository(string costumernumber, string username, string projectnumber) {
+            //Initialize communication and get authentication header
+            string authHeader = await InitializeCommunication();
+
+            //If something happen then return null and lets the external user take care of the error.
+            if (ErrorOccurred) return null;
+
+            //If everything goes well then lets try to get the data from the service with the authorization header obtained from the InitializationMethod
+            //Define the total of requests we can send to the service, if token is valid only one will be needed. If token is invalid then two
+            //If at the second request we get no positive response then something is happening with the service or credentials are
+            //incorrect, in this case change the latesterrordefinition indicating that
+            int requests = 1;
+            while (requests <= 2)
+            {
+                HttpResponseMessage response = null;
+                using (var client = new BomRepoHttpClient("application/json", authHeader))
+                {
+                    response = await client.GetAsync("api/v1/costumers/" + costumernumber + "/branches/" + username + "?projectnumber=" + projectnumber);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var jsonData = response.Content.ReadAsStringAsync().Result;
+                        List<PartsContainerDTO> entity = JsonConvert.DeserializeObject<List<PartsContainerDTO>>(jsonData);
+                        return entity;
+                    }
+                    else if (response.StatusCode != System.Net.HttpStatusCode.Unauthorized)
+                    {
+                        var jsonData = response.Content.ReadAsStringAsync().Result;
+                        latestErrorDefinition = JsonConvert.DeserializeObject<ErrorDefinition>(jsonData);
+                        return null;
+                    }
+                }
+
+                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized) authHeader = await RefreshToken();
+                requests += 1;
+            }
+
+            latestErrorDefinition = ErrorCatalog.ServiceUnavailableOrInvalidCredentials;
+            return null;
+        }
+
+        /// <summary>
+        /// Get entity properties for an specific project. If entityid == null then all project entities will be retrieved, if entityid != null then 
+        /// only properties for that specific entity will be retrieved
+        /// </summary>
+        /// <param name="costumernumber">Required string indicating the costumer number</param>
+        /// <param name="projectnumber">Required string indicating the project number</param>
+        /// <param name="entityid">Required nullable integer indicating the id of entity</param>
+        /// <returns></returns>
+        public async Task<List<EntityPropertyDTO>> GetEntityProperties(string costumernumber, string projectnumber, int? entityid) {
+            //Initialize communication and get authentication header
+            string authHeader = await InitializeCommunication();
+
+            //If something happen then return null and lets the external user take care of the error.
+            if (ErrorOccurred) return null;
+
+            //If everything goes well then lets try to get the data from the service with the authorization header obtained from the InitializationMethod
+            //Define the total of requests we can send to the service, if token is valid only one will be needed. If token is invalid then two
+            //If at the second request we get no positive response then something is happening with the service or credentials are
+            //incorrect, in this case change the latesterrordefinition indicating that
+            int requests = 1;
+            while (requests <= 2)
+            {
+                HttpResponseMessage response = null;
+                using (var client = new BomRepoHttpClient("application/json", authHeader))
+                {
+                    response = await client.GetAsync("api/v1/costumers/" + costumernumber + "/entityproperties?projectnumber=" + projectnumber + "&entityid=" + entityid);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var jsonData = response.Content.ReadAsStringAsync().Result;
+                        List<EntityPropertyDTO> entity = JsonConvert.DeserializeObject<List<EntityPropertyDTO>>(jsonData);
+                        return entity;
+                    }
+                    else if (response.StatusCode != System.Net.HttpStatusCode.Unauthorized)
+                    {
+                        var jsonData = response.Content.ReadAsStringAsync().Result;
+                        latestErrorDefinition = JsonConvert.DeserializeObject<ErrorDefinition>(jsonData);
+                        return null;
+                    }
+                }
+
+                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized) authHeader = await RefreshToken();
+                requests += 1;
+            }
+
+            latestErrorDefinition = ErrorCatalog.ServiceUnavailableOrInvalidCredentials;
+            return null;
+        }
+
+        /// <summary>
+        /// Gets all entities in a project
+        /// </summary>
+        /// <param name="costumernumber">Required string indicating costumer number</param>
+        /// <param name="projectnumber">Required string indicating projectnumber</param>
+        /// <returns></returns>
+        public async Task<List<EntityDTO>> GetProjectEntities(string costumernumber, string projectnumber) {
+            //Initialize communication and get authentication header
+            string authHeader = await InitializeCommunication();
+
+            //If something happen then return null and lets the external user take care of the error.
+            if (ErrorOccurred) return null;
+
+            //If everything goes well then lets try to get the data from the service with the authorization header obtained from the InitializationMethod
+            //Define the total of requests we can send to the service, if token is valid only one will be needed. If token is invalid then two
+            //If at the second request we get no positive response then something is happening with the service or credentials are
+            //incorrect, in this case change the latesterrordefinition indicating that
+            int requests = 1;
+            while (requests <= 2)
+            {
+                HttpResponseMessage response = null;
+                using (var client = new BomRepoHttpClient("application/json", authHeader))
+                {
+                    response = await client.GetAsync("api/v1/costumers/" + costumernumber + "/entities?projectnumber=" + projectnumber);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var jsonData = response.Content.ReadAsStringAsync().Result;
+                        List<EntityDTO> entity = JsonConvert.DeserializeObject<List<EntityDTO>>(jsonData);
+                        return entity;
+                    }
+                    else if (response.StatusCode != System.Net.HttpStatusCode.Unauthorized)
+                    {
+                        var jsonData = response.Content.ReadAsStringAsync().Result;
+                        latestErrorDefinition = JsonConvert.DeserializeObject<ErrorDefinition>(jsonData);
+                        return null;
+                    }
+                }
+
+                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized) authHeader = await RefreshToken();
+                requests += 1;
+            }
+
+            latestErrorDefinition = ErrorCatalog.ServiceUnavailableOrInvalidCredentials;
+            return null;
+        }
+
         #region Helpers
         /// <summary>
         /// Initializes internal flags before start communicating with the service

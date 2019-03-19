@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace BomRepo.BRXXXXX.DL
+namespace BomRepo.BRXXXXX.DTO
 {
     public class EntityDTO
     {

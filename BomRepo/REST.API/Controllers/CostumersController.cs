@@ -153,6 +153,7 @@ namespace REST.API.Controllers
 
             using (var db = new BRXXXXXModel(costumernumber)) {
                 UserBranchPartsManager partMan = new UserBranchPartsManager(db);
+                UserBranchPartPropertiesManager userPropMan = new UserBranchPartPropertiesManager(db);
 
                 //Get All container parts
                 List<PartsContainerDTO> result = new List<PartsContainerDTO>();
@@ -160,9 +161,17 @@ namespace REST.API.Controllers
                     PartsContainerDTO newdto = new PartsContainerDTO();
                     newdto.ParentPartId = container.Id;
                     newdto.ParentPartName = container.Name;
+                    newdto.ParentProperties = new List<PartPropertyDTO>();
                     newdto.Placements = new List<PartPlacementDTO>();
-                    foreach (KeyValuePair<int, UserBranchPart> kvp in partMan.GetPartPlacements(container.Id))
+                    foreach (KeyValuePair<int, UserBranchPart> kvp in partMan.GetPartPlacements(container.Id)) {
+                        PartPlacementDTO placement = new PartPlacementDTO();
+                        placement.PartId = kvp.Value.Id;
+                        placement.PartName = kvp.Value.Name;
+                        placement.Qty = kvp.Key;
+                        placement.PartProperties = Mapper.Map<List<UserBranchPartProperty>, List<PartPropertyDTO>>(userPropMan.GetAll(kvp.Value.Id));
                         newdto.Placements.Add(new PartPlacementDTO() { PartId = kvp.Value.Id, PartName = kvp.Value.Name, Qty = kvp.Key });
+                    }
+                        
                     result.Add(newdto);
                 }
                 
@@ -215,7 +224,6 @@ namespace REST.API.Controllers
                 parent.EntityId = -1;
                 parent.UserBranchId = userbranch.Id;
                 parent.Name = dto.ParentPartName;
-                parent.Description = string.Empty;
                 parent = partMan.Add(parent) as UserBranchPart;
                 if (parent == null) return BadRequest(partMan.ErrorDefinition);
 
@@ -246,7 +254,6 @@ namespace REST.API.Controllers
                         UserBranchId = parent.UserBranchId,
                         EntityId = -1,
                         Name = pp.PartName,
-                        Description = string.Empty
                     }) as UserBranchPart;
                     if (child == null) return BadRequest(partMan.ErrorDefinition);
 
@@ -296,7 +303,6 @@ namespace REST.API.Controllers
                         ProjectId = project.Id,
                         EntityId = container.EntityId,
                         Name = container.Name,
-                        Description = container.Description
                     }) as Part;
                     if (newcontainerpart == null) return BadRequest(partsMan.ErrorDefinition);
 
@@ -311,7 +317,6 @@ namespace REST.API.Controllers
                             ProjectId = project.Id,
                             EntityId = kvp.Value.EntityId,
                             Name = kvp.Value.Name,
-                            Description = kvp.Value.Description
                         }) as Part;
                         if (part == null) return BadRequest(partsMan.ErrorDefinition);
 
@@ -342,9 +347,29 @@ namespace REST.API.Controllers
 
         #endregion
 
+        #region EntityProperties
+
+        // GET api/v1/costumers/{costumernumber}/entityproperties?projectnumber=projectnumber&entityid=entityid}
+        [HttpGet("{costumernumber}/entityproperties")]
+        public ActionResult<List<EntityDTO>> GetEntityProperties(string costumernumber, [FromQuery]string projectnumber,[FromQuery]int? entityid)
+        {
+            if (GetCostumer(costumernumber) == null) return NotFound(ErrorCatalog.CostumerDoesNotExist);
+            Project project = GetProject(costumernumber, projectnumber);
+            if (project == null) return NotFound(ErrorCatalog.ProjectDoesNotExist);
+
+            using (var db = new BRXXXXXModel(costumernumber))
+            {
+                EntityPropertiesManager propMan = new EntityPropertiesManager(db);
+                List<EntityProperty> properties = propMan.Get(costumernumber, entityid);
+                return Ok(Mapper.Map<List<EntityProperty>, List<EntityPropertyDTO>>(properties));
+            }
+        }
+
+        #endregion
+
         #region Entities
 
-        // GET api/v1/costumers/{costumernumber}/entities}
+        // GET api/v1/costumers/{costumernumber}/entities?projectnumber=projectnumber}
         [HttpGet("{costumernumber}/entities")]
         public ActionResult<List<EntityDTO>> GetEntities(string costumernumber, [FromQuery]string projectnumber)
         {
@@ -407,6 +432,10 @@ namespace REST.API.Controllers
                 return Ok();
             }
         }
+
+        #endregion
+
+        #region Parts
 
         #endregion
 

@@ -28,13 +28,15 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.btnPush = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.lvParts = new System.Windows.Forms.ListView();
-            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
+            this.dgvParts = new System.Windows.Forms.DataGridView();
+            this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.label1 = new System.Windows.Forms.Label();
@@ -43,6 +45,8 @@
             this.lblContainerName = new System.Windows.Forms.Label();
             this.tableLayoutPanel1.SuspendLayout();
             this.groupBox1.SuspendLayout();
+            this.tableLayoutPanel3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvParts)).BeginInit();
             this.groupBox2.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.SuspendLayout();
@@ -98,7 +102,7 @@
             // groupBox1
             // 
             this.tableLayoutPanel1.SetColumnSpan(this.groupBox1, 3);
-            this.groupBox1.Controls.Add(this.lvParts);
+            this.groupBox1.Controls.Add(this.tableLayoutPanel3);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox1.Location = new System.Drawing.Point(0, 74);
             this.groupBox1.Margin = new System.Windows.Forms.Padding(0);
@@ -109,32 +113,55 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "  Parts  ";
             // 
-            // lvParts
+            // tableLayoutPanel3
             // 
-            this.lvParts.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.lvParts.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader1,
-            this.columnHeader2});
-            this.lvParts.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lvParts.FullRowSelect = true;
-            this.lvParts.Location = new System.Drawing.Point(7, 20);
-            this.lvParts.Name = "lvParts";
-            this.lvParts.ShowItemToolTips = true;
-            this.lvParts.Size = new System.Drawing.Size(296, 246);
-            this.lvParts.Sorting = System.Windows.Forms.SortOrder.Ascending;
-            this.lvParts.TabIndex = 0;
-            this.lvParts.UseCompatibleStateImageBehavior = false;
-            this.lvParts.View = System.Windows.Forms.View.Details;
+            this.tableLayoutPanel3.ColumnCount = 1;
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel3.Controls.Add(this.dgvParts, 0, 0);
+            this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(7, 20);
+            this.tableLayoutPanel3.Name = "tableLayoutPanel3";
+            this.tableLayoutPanel3.RowCount = 1;
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel3.Size = new System.Drawing.Size(296, 246);
+            this.tableLayoutPanel3.TabIndex = 0;
             // 
-            // columnHeader1
+            // dgvParts
             // 
-            this.columnHeader1.Text = "Name";
-            this.columnHeader1.Width = 215;
+            this.dgvParts.AllowUserToAddRows = false;
+            this.dgvParts.AllowUserToDeleteRows = false;
+            this.dgvParts.AllowUserToResizeRows = false;
+            this.dgvParts.BackgroundColor = System.Drawing.Color.White;
+            this.dgvParts.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.dgvParts.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvParts.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.Column1,
+            this.Column2});
+            this.dgvParts.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgvParts.Location = new System.Drawing.Point(3, 3);
+            this.dgvParts.MultiSelect = false;
+            this.dgvParts.Name = "dgvParts";
+            this.dgvParts.RowHeadersVisible = false;
+            this.dgvParts.Size = new System.Drawing.Size(290, 240);
+            this.dgvParts.TabIndex = 0;
             // 
-            // columnHeader2
+            // Column1
             // 
-            this.columnHeader2.Text = "Quantity";
-            this.columnHeader2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.Column1.DefaultCellStyle = dataGridViewCellStyle1;
+            this.Column1.HeaderText = "Quantity";
+            this.Column1.Name = "Column1";
+            this.Column1.ReadOnly = true;
+            this.Column1.Width = 60;
+            // 
+            // Column2
+            // 
+            this.Column2.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Column2.HeaderText = "Name";
+            this.Column2.Name = "Column2";
+            this.Column2.ReadOnly = true;
             // 
             // groupBox2
             // 
@@ -234,6 +261,8 @@
             this.Shown += new System.EventHandler(this.pushform_Shown);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
+            this.tableLayoutPanel3.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dgvParts)).EndInit();
             this.groupBox2.ResumeLayout(false);
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
@@ -247,14 +276,15 @@
         private System.Windows.Forms.Button btnPush;
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.ListView lvParts;
-        private System.Windows.Forms.ColumnHeader columnHeader1;
-        private System.Windows.Forms.ColumnHeader columnHeader2;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label lblProjectNumber;
         private System.Windows.Forms.Label lblContainerName;
+        private System.Windows.Forms.DataGridView dgvParts;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Column1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Column2;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
     }
 }

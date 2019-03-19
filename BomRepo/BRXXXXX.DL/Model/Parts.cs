@@ -15,7 +15,6 @@ namespace BomRepo.BRXXXXX.DL
         public int ProjectId { get; set; }
         public int EntityId { get; set; }
         public string Name { get; set; }
-        public string Description { get; set; }
     }
 
     public class PartValidator : AbstractValidator<Part> {

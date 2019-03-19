@@ -124,6 +124,27 @@ namespace BomRepo.Autocad.API
             AutocadHelper.ShowCommandLineMessage(new string[3] { "BOMRepo version " + assemblyVersion, message, "BRSELECTPROJECT successfully executed." });
         }
 
+        [CommandMethod("brmyrepo")]
+        public async void brmyrepo() {
+            //Show Messages
+            AutocadHelper.ShowCommandLineMessage(new string[1] { "BOMRepo version " + assemblyVersion });
+
+            //Verify if user is connected
+            if (connecteduser == null)
+            {
+                AutocadHelper.ShowErrorMessage(ErrorCatalog.UserNotConnected);
+                AutocadHelper.ShowCommandLineMessage(new string[1] { "BRSELECTPROJECT successfully executed." });
+                return;
+            }
+
+            //Get All projects
+            List<ProjectDTO> projects = await BomRepoServiceClient.Instance.GetProjects(connecteduser.Costumers[0].Number);
+
+            //Show data
+            getrepoform form = new getrepoform(connecteduser.Costumers[0].Number, connecteduser.Username, projects, selectedproject.Number);
+            form.ShowDialog();
+        }
+
         /// <summary>
         /// brcount asks for an assembly name, then allow the selection of text and mtext objects. All selected objects
         /// are count and a table is created and inserted in the drawing showing the assembly name and all the parts count.
@@ -329,6 +350,16 @@ namespace BomRepo.Autocad.API
 
             //Show message indicating everything is ok
             acEditor.WriteMessage("Object were successfully selected \n\r");
+
+            //Generate a random part properties list here. In a near future, we can go inside a block and get all the properties from there
+            //and sent it to the publish form matching the real properties with the ones selected by the user in cad
+            foreach (KeyValuePair<string, PartPlacementDTO> kvp in dictAssemblyParts) {
+                kvp.Value.PartProperties = new List<PartPropertyDTO>();
+                kvp.Value.PartProperties.Add(new PartPropertyDTO() { PropertyName = "Length", Value = "12.500" });
+                kvp.Value.PartProperties.Add(new PartPropertyDTO() { PropertyName = "Width", Value = "0.000" });
+                kvp.Value.PartProperties.Add(new PartPropertyDTO() { PropertyName = "Height", Value = "0.000" });
+                kvp.Value.PartProperties.Add(new PartPropertyDTO() { PropertyName = "Thinkness", Value = "0.000" });
+            }
 
             //Transmit data to repository
             pushform form = new pushform(connecteduser.Costumers[0].Number, connecteduser.Username, selectedproject, assemblyName, dictAssemblyParts);

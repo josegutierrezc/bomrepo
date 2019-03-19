@@ -30,6 +30,14 @@ namespace BomRepo.BRXXXXX.DL
                 return null;
             }
 
+            //Get UserBranch
+            UserBranch userbranch = db.UserBranches.Where(e => e.Id == userpart.UserBranchId).FirstOrDefault();
+            if (userbranch == null) {
+                errorDefinition = ErrorCatalog.UserBranchDoesNotExist;
+                errorDefinition.ReplaceParameterValueInUserDescription("@1", userpart.Name.ToUpper());
+                return null;
+            }
+
             //Check for entity existency if entityid <> -1
             Entity ent = null;
             if (userpart.EntityId == -1)
@@ -45,6 +53,18 @@ namespace BomRepo.BRXXXXX.DL
                 if (ent == null)
                 {
                     errorDefinition = ErrorCatalog.WrongPartName;
+                    errorDefinition.ReplaceParameterValueInUserDescription("@1", userpart.Name.ToUpper());
+                    return null;
+                }
+
+                //Verify Entity is linked with project
+                var linked = from ub in db.UserBranches
+                             join pe in db.ProjectEntities on ub.ProjectId equals pe.ProjectId
+                             join e in db.Entities on pe.EntityId equals e.Id
+                             where ub.Id == userbranch.Id & e.Id == ent.Id
+                             select e;
+                if (linked.FirstOrDefault() == null) {
+                    errorDefinition = ErrorCatalog.EntityProjectReferenceDoesNotExist;
                     errorDefinition.ReplaceParameterValueInUserDescription("@1", userpart.Name.ToUpper());
                     return null;
                 }
@@ -76,7 +96,6 @@ namespace BomRepo.BRXXXXX.DL
                     UserBranchId = userpart.UserBranchId,
                     EntityId = ent.Id,
                     Name = userpart.Name.ToUpper(),
-                    Description = userpart.Description
                 };
                 db.UserBranchParts.Add(part);
                 db.SaveChanges();
@@ -94,10 +113,12 @@ namespace BomRepo.BRXXXXX.DL
         {
             throw new NotImplementedException();
         }
+
         public List<KeyValuePair<int, UserBranchPart>> GetPartPlacements(int parentid) {
             var query = from ubpp in db.UserBranchPartPlacements
                         join ubp in db.UserBranchParts on ubpp.ChildUserBranchPartId equals ubp.Id
                         where ubpp.ParentUserBranchPartId == parentid
+                        orderby ubp.Name
                         select new
                         {
                             UserBranchPart = ubp,
@@ -131,11 +152,13 @@ namespace BomRepo.BRXXXXX.DL
             if (entity == null) return false;
             return entity.IsContainer;
         }
+
         public List<UserBranchPart> GetContainers(string username, string projectnumber) {
             var query = from ubp in db.UserBranchParts
                         join ub in db.UserBranches on ubp.UserBranchId equals ub.Id
                         join e in db.Entities on ubp.EntityId equals e.Id
                         where e.IsContainer & ub.Username == username
+                        orderby ubp.Name
                         select ubp;
             if (projectnumber != string.Empty) {
                 query = from ubp in query

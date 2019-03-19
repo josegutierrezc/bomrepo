@@ -31,6 +31,8 @@ namespace BomRepo.ErrorsCatalog
         public static ErrorDefinition WrongPartName = new ErrorDefinition("BRX.102", "Wrong part name", ErrorDefinitionClassification.Warning, "Part @1 is not written correctly. No part definition was found with this pattern.", string.Empty, false);
         public static ErrorDefinition SelfContainedError = new ErrorDefinition("BRX.103", "Container pointing to itself", ErrorDefinitionClassification.Warning, "Container @1 cannot be part of its own content.", string.Empty, false);
         public static ErrorDefinition ContainerPartRequired = new ErrorDefinition("BRX.104", "Container part required", ErrorDefinitionClassification.Warning, "A container part is required and @1 is not.", string.Empty, false);
+        public static ErrorDefinition UserBranchDoesNotExist = new ErrorDefinition("BRX.105", "User branch does not exist", ErrorDefinitionClassification.Warning, "Part @1 cannot be created because is assigned to a user branch that does not exist.", string.Empty, false);
+        public static ErrorDefinition EntityProjectReferenceDoesNotExist = new ErrorDefinition("BRX.106", "Entity and Project reference does not exist", ErrorDefinitionClassification.Warning, "Part @1 cannot be created because a reference between its definition and project does not exist.", string.Empty, false);
         public static ErrorDefinition CreateFrom(ErrorDefinition Definition, string DeveloperDescription) {
             return new ErrorDefinition(Definition.Code, Definition.Title, Definition.Classification, Definition.UserDescription, DeveloperDescription, Definition.OnlyForDeveloperEye);
         }

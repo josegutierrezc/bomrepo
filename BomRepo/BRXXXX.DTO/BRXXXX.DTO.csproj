@@ -42,9 +42,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EntityDTO.cs" />
+    <Compile Include="EntityPropertyDTO.cs" />
     <Compile Include="PartDTO.cs" />
+    <Compile Include="PartPropertyDTO.cs" />
     <Compile Include="ProjectDTO.cs" />
     <Compile Include="ProjectStatusDTO.cs" />
+    <Compile Include="PropertyDTO.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UserBranchPartDTO.cs" />
     <Compile Include="UserBranchDTO.cs" />

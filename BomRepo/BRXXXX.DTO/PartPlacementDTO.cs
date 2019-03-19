@@ -9,5 +9,6 @@ namespace BomRepo.BRXXXXX.DTO
         public int PartId { get; set; }
         public string PartName { get; set; }
         public int Qty { get; set; }
+        public List<PartPropertyDTO> PartProperties { get; set; }
     }
 }

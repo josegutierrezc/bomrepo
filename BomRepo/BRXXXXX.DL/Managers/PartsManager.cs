@@ -61,7 +61,6 @@ namespace BomRepo.BRXXXXX.DL
                     ProjectId = part.ProjectId,
                     EntityId = ent.Id,
                     Name = part.Name.ToUpper(),
-                    Description = part.Description
                 };
                 db.Parts.Add(newpart);
                 db.SaveChanges();
@@ -76,7 +75,6 @@ namespace BomRepo.BRXXXXX.DL
                 newpart.ModifiedByUsername = part.ModifiedByUsername;
                 newpart.EntityId = part.EntityId;
                 newpart.Name = part.Name.ToUpper();
-                newpart.Description = part.Description;
                 db.SaveChanges();
             }
 
@@ -101,6 +99,36 @@ namespace BomRepo.BRXXXXX.DL
         public override bool Update(object entity)
         {
             throw new NotImplementedException();
+        }
+
+        public List<EntityProperty> GetProperties(string partname) {
+            //Find the entity id by part name
+            Entity ent = null;
+            foreach (Entity e in db.Entities)
+                if (EntityNamePattern.EntityNamePattern.MatchPattern(e.NamePattern, partname))
+                {
+                    ent = e;
+                    break;
+                }
+
+            if (ent == null)
+            {
+                errorDefinition = ErrorCatalog.WrongPartName;
+                errorDefinition.ReplaceParameterValueInUserDescription("@1", partname.ToUpper());
+                return null;
+            }
+
+            //Get EntityProperties
+            var query = from ep in db.EntityProperties
+                        join prop in db.Properties on ep.PropertyId equals prop.Id
+                        where ep.EntityId == ent.Id
+                        select new EntityProperty()
+                        {
+                            EntityId = ep.EntityId,
+                            PropertyId = ep.PropertyId,
+                            Property = prop
+                        };
+            return query.ToList();
         }
     }
 }

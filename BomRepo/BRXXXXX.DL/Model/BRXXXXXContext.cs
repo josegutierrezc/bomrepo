@@ -20,10 +20,14 @@ namespace BomRepo.BRXXXXX.DL
         public virtual DbSet<UserBranch> UserBranches { get; set; }
         public virtual DbSet<UserBranchPart> UserBranchParts { get; set; }
         public virtual DbSet<UserBranchPartPlacement> UserBranchPartPlacements { get; set; }
+        public virtual DbSet<UserBranchPartProperty> UserBranchPartProperties { get; set; }
         public virtual DbSet<Entity> Entities { get; set; }
         public virtual DbSet<ProjectEntity> ProjectEntities { get; set; }
         public virtual DbSet<Part> Parts { get; set; }
         public virtual DbSet<PartPlacement> PartPlacements { get; set; }
+        public virtual DbSet<Property> Properties { get; set; }
+        public virtual DbSet<EntityProperty> EntityProperties { get; set; }
+        public virtual DbSet<PartProperty> PartProperties { get; set; }
         
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -75,6 +79,10 @@ namespace BomRepo.BRXXXXX.DL
                 entity.Property(e => e.Qty).IsRequired();
             });
 
+            modelBuilder.Entity<UserBranchPartProperty>(entity => {
+                entity.HasKey(e => new { e.UserBranchPartId, e.PropertyId });
+            });
+
             modelBuilder.Entity<Entity>(entity =>
             {
                 entity.HasKey(e => new { e.Id });
@@ -93,6 +101,24 @@ namespace BomRepo.BRXXXXX.DL
             modelBuilder.Entity<PartPlacement>(entity => {
                 entity.HasKey(e => new { e.ParentPartId, e.ChildPartId });
                 entity.Property(e => e.Qty).IsRequired();
+            });
+
+            modelBuilder.Entity<Property>(entity => {
+                entity.HasKey(e => new { e.Id });
+                entity.Property(e => e.Name).IsRequired();
+                entity.Property(e => e.IsString).IsRequired();
+                entity.Property(e => e.IsInteger).IsRequired();
+                entity.Property(e => e.IsDouble).IsRequired();
+                entity.Property(e => e.IsBoolean).IsRequired();
+                entity.Property(e => e.IsDateTime).IsRequired();
+            });
+
+            modelBuilder.Entity<EntityProperty>(entity => {
+                entity.HasKey(e => new { e.EntityId, e.PropertyId });
+            });
+
+            modelBuilder.Entity<PartProperty>(entity => {
+                entity.HasKey(e => new { e.PartId, e.PropertyId });
             });
         }
     }

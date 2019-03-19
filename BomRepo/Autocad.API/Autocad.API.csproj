@@ -78,11 +78,17 @@
     <Compile Include="..\BRXXXX.DTO\EntityDTO.cs">
       <Link>BRXXXXX.DTO\EntityDTO.cs</Link>
     </Compile>
+    <Compile Include="..\BRXXXX.DTO\EntityPropertyDTO.cs">
+      <Link>BRXXXXX.DTO\EntityPropertyDTO.cs</Link>
+    </Compile>
     <Compile Include="..\BRXXXX.DTO\PartDTO.cs">
       <Link>BRXXXXX.DTO\PartDTO.cs</Link>
     </Compile>
     <Compile Include="..\BRXXXX.DTO\PartPlacementDTO.cs">
       <Link>BRXXXXX.DTO\PartPlacementDTO.cs</Link>
+    </Compile>
+    <Compile Include="..\BRXXXX.DTO\PartPropertyDTO.cs">
+      <Link>BRXXXXX.DTO\PartPropertyDTO.cs</Link>
     </Compile>
     <Compile Include="..\BRXXXX.DTO\PartsContainerDTO.cs">
       <Link>BRXXXXX.DTO\PartsContainerDTO.cs</Link>
@@ -93,11 +99,17 @@
     <Compile Include="..\BRXXXX.DTO\ProjectStatusDTO.cs">
       <Link>BRXXXXX.DTO\ProjectStatusDTO.cs</Link>
     </Compile>
+    <Compile Include="..\BRXXXX.DTO\PropertyDTO.cs">
+      <Link>BRXXXXX.DTO\PropertyDTO.cs</Link>
+    </Compile>
     <Compile Include="..\BRXXXX.DTO\UserBranchDTO.cs">
       <Link>BRXXXXX.DTO\UserBranchDTO.cs</Link>
     </Compile>
     <Compile Include="..\BRXXXX.DTO\UserBranchPartDTO.cs">
       <Link>BRXXXXX.DTO\UserBranchPartDTO.cs</Link>
+    </Compile>
+    <Compile Include="..\EntityNamePattern\EntityNamePattern.cs">
+      <Link>EntityNamePattern\EntityNamePattern.cs</Link>
     </Compile>
     <Compile Include="..\ErrorsCatalog\ErrorsCatalog.cs">
       <Link>ErrorsCatalog\ErrorsCatalog.cs</Link>

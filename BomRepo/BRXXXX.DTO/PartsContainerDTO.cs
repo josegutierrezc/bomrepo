@@ -10,6 +10,7 @@ namespace BomRepo.BRXXXXX.DTO
     {
         public int ParentPartId { get; set; }
         public string ParentPartName { get; set; }
+        public List<PartPropertyDTO> ParentProperties { get; set; }
         public List<PartPlacementDTO> Placements { get; set; }
     }
 }

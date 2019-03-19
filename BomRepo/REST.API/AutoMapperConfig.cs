@@ -40,6 +40,9 @@ namespace BomRepo.REST.API
             CreateMap<ProjectStatus, ProjectStatusDTO>();
             CreateMap<UserBranch, UserBranchDTO>();
             CreateMap<UserBranchPart, UserBranchPartDTO>();
+            CreateMap<Property, PropertyDTO>();
+            CreateMap<EntityProperty, EntityPropertyDTO>();
+            CreateMap<PartProperty, PartPropertyDTO>();
         }
     }
 }

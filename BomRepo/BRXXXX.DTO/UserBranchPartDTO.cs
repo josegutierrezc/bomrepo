@@ -11,6 +11,5 @@ namespace BomRepo.BRXXXXX.DTO
         public int UserBranchId { get; set; }
         public int EntityId { get; set; }
         public string Name { get; set; }
-        public string Description { get; set; }
     }
 }
