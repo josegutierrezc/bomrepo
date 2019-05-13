@@ -9,7 +9,7 @@ namespace BomRepo.BRXXXXX.DTO
         public int Id { get; set; }
         public DateTime CreatedOn { get; set; }
         public int UserBranchId { get; set; }
-        public int EntityId { get; set; }
+        public int PartDefinitionId { get; set; }
         public string Name { get; set; }
     }
 }

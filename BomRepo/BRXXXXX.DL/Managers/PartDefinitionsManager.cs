@@ -9,13 +9,13 @@ using FluentValidation.Results;
 
 namespace BomRepo.BRXXXXX.DL
 {
-    public class EntitiesManager : EntityManagerBase
+    public class PartDefinitionsManager : EntityManagerBase
     {
-        public EntitiesManager(BRXXXXXModel db) : base(db) {
+        public PartDefinitionsManager(BRXXXXXModel db) : base(db) {
         }
         public override object Add(object entity) {
             //Typecast
-            Entity myentity = entity as Entity;
+            PartDefinition myentity = entity as PartDefinition;
             if (myentity == null) {
                 errorDefinition = ErrorCatalog.CreateFrom(ErrorCatalog.ValidationFailed, "Entity cannot be null");
                 return null;
@@ -34,11 +34,11 @@ namespace BomRepo.BRXXXXX.DL
             }
 
             //Verify that an entity with the same name or pattern does not exist
-            var samenameentity = db.Entities.Where(e => e.Name.ToLower() == myentity.Name.ToLower() | e.NamePattern.ToLower() == myentity.NamePattern.ToLower()).FirstOrDefault();
+            var samenameentity = db.PartDefinitions.Where(e => e.Name.ToLower() == myentity.Name.ToLower() | e.NamePattern.ToLower() == myentity.NamePattern.ToLower()).FirstOrDefault();
             if (samenameentity != null) return samenameentity;
 
             //Create it
-            Entity newentity = new Entity()
+            PartDefinition newentity = new PartDefinition()
             {
                 CreatedOn = DateTime.UtcNow,
                 CreatedByUsername = myentity.CreatedByUsername,
@@ -48,28 +48,28 @@ namespace BomRepo.BRXXXXX.DL
             };
 
             //Add and save it
-            db.Entities.Add(newentity);
+            db.PartDefinitions.Add(newentity);
             db.SaveChanges();
 
             return true;
         }
         public override object GetAll() {
-            return db.Entities.ToList();
+            return db.PartDefinitions.ToList();
         }
         public override object Get(int entityid) {
-            return db.Entities.Where(e => e.Id == entityid).FirstOrDefault();
+            return db.PartDefinitions.Where(e => e.Id == entityid).FirstOrDefault();
         }
-        public List<Entity> GetByProject(string projectnumber) {
-            var entities = from pe in db.ProjectEntities
-                           join e in db.Entities on pe.EntityId equals e.Id
+        public List<PartDefinition> GetByProject(string projectnumber) {
+            var entities = from pe in db.ProjectPartDefinitions
+                           join e in db.PartDefinitions on pe.PartDefinitionId equals e.Id
                            join p in db.Projects on pe.ProjectId equals p.Id
                            where p.Number == projectnumber
                            select e;
             return entities.ToList();
         }
-        public Entity GetByProject(string projectnumber, int entityid) {
-            var entities = from pe in db.ProjectEntities
-                           join e in db.Entities on pe.EntityId equals e.Id
+        public PartDefinition GetByProject(string projectnumber, int entityid) {
+            var entities = from pe in db.ProjectPartDefinitions
+                           join e in db.PartDefinitions on pe.PartDefinitionId equals e.Id
                            join p in db.Projects on pe.ProjectId equals p.Id
                            where p.Number == projectnumber & e.Id == entityid
                            select e;
@@ -84,52 +84,52 @@ namespace BomRepo.BRXXXXX.DL
             }
 
             //Verify entity does exists
-            var entity = db.Entities.Where(e => e.Id == entityid).FirstOrDefault();
+            var entity = db.PartDefinitions.Where(e => e.Id == entityid).FirstOrDefault();
             if (entity == null) {
                 errorDefinition = ErrorCatalog.CreateFrom(ErrorCatalog.ValidationFailed, "Entity does not exists");
                 return false;
             }
 
             //Verify entity is not assigned to project already. If is assigned then we do not need to do anything else
-            var assigment = db.ProjectEntities.Where(e => e.ProjectId == project.Id & e.EntityId == entity.Id).FirstOrDefault();
+            var assigment = db.ProjectPartDefinitions.Where(e => e.ProjectId == project.Id & e.PartDefinitionId == entity.Id).FirstOrDefault();
             if (assigment != null) return true;
 
             //Created it
-            ProjectEntity pe = new ProjectEntity()
+            ProjectPartDefinition pe = new ProjectPartDefinition()
             {
-                EntityId = entity.Id,
+                PartDefinitionId = entity.Id,
                 ProjectId = project.Id
             };
 
             //Add and save it
-            db.ProjectEntities.Add(pe);
+            db.ProjectPartDefinitions.Add(pe);
             db.SaveChanges();
 
             return true;
         }
         public bool UnlinkFromProject(string projectnumber, int entityid) {
-            var entities = from pe in db.ProjectEntities
+            var entities = from pe in db.ProjectPartDefinitions
                          join p in db.Projects on pe.ProjectId equals p.Id
-                         where p.Number == projectnumber & pe.EntityId == entityid
+                         where p.Number == projectnumber & pe.PartDefinitionId == entityid
                          select pe;
 
             if (entities.Count() == 0) return true;
 
-            db.ProjectEntities.RemoveRange(entities);
+            db.ProjectPartDefinitions.RemoveRange(entities);
             db.SaveChanges();
             return true;
         }
         public override bool Remove(int entityid) {
             //Verify that entity is not linked to any project
-            var projectlinked = db.ProjectEntities.Where(e => e.EntityId == entityid);
+            var projectlinked = db.ProjectPartDefinitions.Where(e => e.PartDefinitionId == entityid);
             if (projectlinked.Count() != 0) {
                 errorDefinition = ErrorCatalog.CreateFrom(ErrorCatalog.ValidationFailed, "Entity is linked with one or many projects");
                 return false;
             }
 
             //Verify that entity is not linked with any general or user part
-            var userlinked = db.UserBranchParts.Where(e => e.EntityId == entityid);
-            var generallinked = db.Parts.Where(e => e.EntityId == entityid);
+            var userlinked = db.UserBranchParts.Where(e => e.PartDefinitionId == entityid);
+            var generallinked = db.Parts.Where(e => e.PartDefinitionId == entityid);
             if (userlinked.Count() != 0)
             {
                 errorDefinition = ErrorCatalog.CreateFrom(ErrorCatalog.ValidationFailed, "Entity is linked with one or many user parts");
@@ -142,14 +142,14 @@ namespace BomRepo.BRXXXXX.DL
             }
             
             //Get entity
-            var entity = db.Entities.Where(e => e.Id == entityid).FirstOrDefault();
+            var entity = db.PartDefinitions.Where(e => e.Id == entityid).FirstOrDefault();
             if (entity == null) {
                 errorDefinition = ErrorCatalog.CreateFrom(ErrorCatalog.ValidationFailed, "Entity does not exists");
                 return false;
             }
 
             //Remove it
-            db.Entities.Remove(entity);
+            db.PartDefinitions.Remove(entity);
             db.SaveChanges();
 
             return true;
@@ -157,7 +157,7 @@ namespace BomRepo.BRXXXXX.DL
         public override bool Update(object entity)
         {
             //Typecast
-            Entity myentity = entity as Entity;
+            PartDefinition myentity = entity as PartDefinition;
             if (myentity == null) {
                 errorDefinition = ErrorCatalog.CreateFrom(ErrorCatalog.ValidationFailed, "Entity cannot be null");
                 return false;
@@ -176,7 +176,7 @@ namespace BomRepo.BRXXXXX.DL
             }
 
             //Get current entity
-            Entity current = db.Entities.Where(e => e.Id == myentity.Id).FirstOrDefault();
+            PartDefinition current = db.PartDefinitions.Where(e => e.Id == myentity.Id).FirstOrDefault();
             if (current == null) {
                 errorDefinition = ErrorCatalog.CreateFrom(ErrorCatalog.ValidationFailed, "Entity was not found");
                 return false;
@@ -184,7 +184,7 @@ namespace BomRepo.BRXXXXX.DL
 
             //If name is changed then verify no other entity exist with this new name
             if (current.Name.ToLower() != myentity.Name.ToLower()) {
-                var search = db.Entities.Where(e => e.Name.ToLower() == myentity.Name.ToLower()).FirstOrDefault();
+                var search = db.PartDefinitions.Where(e => e.Name.ToLower() == myentity.Name.ToLower()).FirstOrDefault();
                 if (search != null) {
                     errorDefinition = ErrorCatalog.CreateFrom(ErrorCatalog.ValidationFailed, "Entity name cannot be changed because one with the same name exist already");
                     return false;
@@ -193,7 +193,7 @@ namespace BomRepo.BRXXXXX.DL
 
             //If name pattern was changed then verify no other entity exist with the new pattern
             if (current.NamePattern.ToLower() != myentity.NamePattern.ToLower()) {
-                var search = db.Entities.Where(e => e.NamePattern.ToLower() == myentity.NamePattern.ToLower()).FirstOrDefault();
+                var search = db.PartDefinitions.Where(e => e.NamePattern.ToLower() == myentity.NamePattern.ToLower()).FirstOrDefault();
                 if (search != null)
                 {
                     errorDefinition = ErrorCatalog.CreateFrom(ErrorCatalog.ValidationFailed, "Entity pattern cannot be changed because one with the same pattern already exist");

@@ -39,11 +39,11 @@ namespace BomRepo.BRXXXXX.DL
             }
 
             //Check for entity existency if entityid <> -1
-            Entity ent = null;
-            if (userpart.EntityId == -1)
+            PartDefinition ent = null;
+            if (userpart.PartDefinitionId == -1)
             {
                 //It means that we need to find the entity id by part name
-                foreach (Entity e in db.Entities)
+                foreach (PartDefinition e in db.PartDefinitions)
                     if (EntityNamePattern.EntityNamePattern.MatchPattern(e.NamePattern, userpart.Name))
                     {
                         ent = e;
@@ -59,8 +59,8 @@ namespace BomRepo.BRXXXXX.DL
 
                 //Verify Entity is linked with project
                 var linked = from ub in db.UserBranches
-                             join pe in db.ProjectEntities on ub.ProjectId equals pe.ProjectId
-                             join e in db.Entities on pe.EntityId equals e.Id
+                             join pe in db.ProjectPartDefinitions on ub.ProjectId equals pe.ProjectId
+                             join e in db.PartDefinitions on pe.PartDefinitionId equals e.Id
                              where ub.Id == userbranch.Id & e.Id == ent.Id
                              select e;
                 if (linked.FirstOrDefault() == null) {
@@ -72,7 +72,7 @@ namespace BomRepo.BRXXXXX.DL
             else
             {
                 //It means that an Entity id was already provided
-                ent = db.Entities.Where(e => e.Id == userpart.EntityId).FirstOrDefault();
+                ent = db.PartDefinitions.Where(e => e.Id == userpart.PartDefinitionId).FirstOrDefault();
                 if (ent == null) {
                     errorDefinition = ErrorCatalog.CreateFrom(ErrorCatalog.ValidationFailed, "Entity referencedd in UserBranchPart was not found");
                     return null;
@@ -94,7 +94,7 @@ namespace BomRepo.BRXXXXX.DL
                 part = new UserBranchPart() {
                     CreatedOn = DateTime.UtcNow,
                     UserBranchId = userpart.UserBranchId,
-                    EntityId = ent.Id,
+                    PartDefinitionId = ent.Id,
                     Name = userpart.Name.ToUpper(),
                 };
                 db.UserBranchParts.Add(part);
@@ -147,7 +147,7 @@ namespace BomRepo.BRXXXXX.DL
 
         public bool IsContainerPart(int partid) {
             var entity = (from p in db.UserBranchParts
-                         join e in db.Entities on p.EntityId equals e.Id
+                         join e in db.PartDefinitions on p.PartDefinitionId equals e.Id
                          select e).FirstOrDefault();
             if (entity == null) return false;
             return entity.IsContainer;
@@ -156,7 +156,7 @@ namespace BomRepo.BRXXXXX.DL
         public List<UserBranchPart> GetContainers(string username, string projectnumber) {
             var query = from ubp in db.UserBranchParts
                         join ub in db.UserBranches on ubp.UserBranchId equals ub.Id
-                        join e in db.Entities on ubp.EntityId equals e.Id
+                        join e in db.PartDefinitions on ubp.PartDefinitionId equals e.Id
                         where e.IsContainer & ub.Username == username
                         orderby ubp.Name
                         select ubp;

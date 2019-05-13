@@ -82,6 +82,10 @@ namespace BomRepo.BRXXXXX.DL
         {
             throw new NotImplementedException();
         }
+        public void RemoveAll(int userbranchpartid) {
+            db.UserBranchPartProperties.RemoveRange(db.UserBranchPartProperties.Where(e => e.UserBranchPartId == userbranchpartid));
+            db.SaveChanges();
+        }
 
         public override bool Update(object entity)
         {

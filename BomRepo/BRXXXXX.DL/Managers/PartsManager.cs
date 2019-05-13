@@ -29,7 +29,7 @@ namespace BomRepo.BRXXXXX.DL
             }
 
             //Get Entity
-            Entity ent = db.Entities.Where(e => e.Id == part.EntityId).FirstOrDefault();
+            PartDefinition ent = db.PartDefinitions.Where(e => e.Id == part.PartDefinitionId).FirstOrDefault();
             if (ent == null) {
                 errorDefinition = ErrorCatalog.CreateFrom(ErrorCatalog.ValidationFailed, "Entity referenced in part object was not found");
                 return null;
@@ -59,7 +59,7 @@ namespace BomRepo.BRXXXXX.DL
                     CreatedOn = DateTime.UtcNow,
                     CreatedByUsername = part.CreatedByUsername,
                     ProjectId = part.ProjectId,
-                    EntityId = ent.Id,
+                    PartDefinitionId = ent.Id,
                     Name = part.Name.ToUpper(),
                 };
                 db.Parts.Add(newpart);
@@ -73,7 +73,7 @@ namespace BomRepo.BRXXXXX.DL
                 }
                 newpart.ModifiedOn = DateTime.UtcNow;
                 newpart.ModifiedByUsername = part.ModifiedByUsername;
-                newpart.EntityId = part.EntityId;
+                newpart.PartDefinitionId = part.PartDefinitionId;
                 newpart.Name = part.Name.ToUpper();
                 db.SaveChanges();
             }
@@ -101,10 +101,10 @@ namespace BomRepo.BRXXXXX.DL
             throw new NotImplementedException();
         }
 
-        public List<EntityProperty> GetProperties(string partname) {
+        public List<PartDefinitionProperty> GetProperties(string partname) {
             //Find the entity id by part name
-            Entity ent = null;
-            foreach (Entity e in db.Entities)
+            PartDefinition ent = null;
+            foreach (PartDefinition e in db.PartDefinitions)
                 if (EntityNamePattern.EntityNamePattern.MatchPattern(e.NamePattern, partname))
                 {
                     ent = e;
@@ -119,12 +119,12 @@ namespace BomRepo.BRXXXXX.DL
             }
 
             //Get EntityProperties
-            var query = from ep in db.EntityProperties
+            var query = from ep in db.PartDefinitionProperties
                         join prop in db.Properties on ep.PropertyId equals prop.Id
-                        where ep.EntityId == ent.Id
-                        select new EntityProperty()
+                        where ep.PartDefinitionId == ent.Id
+                        select new PartDefinitionProperty()
                         {
-                            EntityId = ep.EntityId,
+                            PartDefinitionId = ep.PartDefinitionId,
                             PropertyId = ep.PropertyId,
                             Property = prop
                         };

@@ -41,8 +41,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EntityDTO.cs" />
-    <Compile Include="EntityPropertyDTO.cs" />
+    <Compile Include="PartDefinitionDTO.cs" />
+    <Compile Include="PartDefinitionPropertyDTO.cs" />
     <Compile Include="PartDTO.cs" />
     <Compile Include="PartPropertyDTO.cs" />
     <Compile Include="ProjectDTO.cs" />

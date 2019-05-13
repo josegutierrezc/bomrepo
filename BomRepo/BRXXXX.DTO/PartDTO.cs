@@ -13,7 +13,7 @@ namespace BomRepo.BRXXXXX.DTO
         public string CreatedByUsername { get; set; }
         public DateTime? ModifiedOn { get; set; }
         public string ModifiedByUsername { get; set; }
-        public int EntityId { get; set; }
+        public int PartDefinitionId { get; set; }
         public string Name { get; set; }
     }
 }

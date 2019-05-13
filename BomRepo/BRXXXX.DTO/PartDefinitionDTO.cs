@@ -4,7 +4,7 @@ using System.Text;
 
 namespace BomRepo.BRXXXXX.DTO
 {
-    public class EntityDTO
+    public class PartDefinitionDTO
     {
         public int Id { get; set; }
         public DateTime CreatedOn { get; set; }

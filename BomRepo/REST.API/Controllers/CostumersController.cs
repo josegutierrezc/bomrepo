@@ -209,7 +209,8 @@ namespace REST.API.Controllers
                 //Get User branches
                 UserBranch userbranch = null;
                 List<UserBranch> userbranches = branchMan.Get(username, projectnumber) as List<UserBranch>;
-                if (userbranches.Count() == 0) {
+                if (userbranches.Count() == 0)
+                {
                     //Create one
                     userbranch = branchMan.Add(new UserBranch()
                     {
@@ -218,14 +219,29 @@ namespace REST.API.Controllers
                     }) as UserBranch;
                 }
                 else userbranch = userbranches[0];
-
+                    
                 //Add parent
                 UserBranchPart parent = new UserBranchPart();
-                parent.EntityId = -1;
+                parent.PartDefinitionId = -1;
                 parent.UserBranchId = userbranch.Id;
                 parent.Name = dto.ParentPartName;
                 parent = partMan.Add(parent) as UserBranchPart;
                 if (parent == null) return BadRequest(partMan.ErrorDefinition);
+
+                //Remove all existing parent properties
+                UserBranchPartPropertiesManager propMan = new UserBranchPartPropertiesManager(db);
+                propMan.RemoveAll(parent.Id);
+
+                //Add parent properties
+                foreach (PartProperty property in Mapper.Map<List<PartPropertyDTO>, List<PartProperty>>(dto.ParentProperties)) {
+                    UserBranchPartProperty prop = new UserBranchPartProperty();
+                    prop.PropertyId = property.PropertyId;
+                    prop.PropertyName = property.PropertyName;
+                    prop.UserBranchPartId = parent.Id;
+                    prop.Value = property.Value;
+                    propMan.Add(prop);
+                }
+                    
 
                 //Verify parent is container
                 if (!partMan.IsContainerPart(parent.Id)) {
@@ -252,10 +268,23 @@ namespace REST.API.Controllers
                     UserBranchPart child = partMan.Add(new UserBranchPart()
                     {
                         UserBranchId = parent.UserBranchId,
-                        EntityId = -1,
+                        PartDefinitionId = -1,
                         Name = pp.PartName,
                     }) as UserBranchPart;
                     if (child == null) return BadRequest(partMan.ErrorDefinition);
+
+                    //Remove current part properties
+                    propMan.RemoveAll(child.Id);
+
+                    //Add part properties
+                    foreach (PartProperty property in Mapper.Map<List<PartPropertyDTO>, List<PartProperty>>(pp.PartProperties)) {
+                        UserBranchPartProperty prop = new UserBranchPartProperty();
+                        prop.UserBranchPartId = child.Id;
+                        prop.PropertyId = property.PropertyId;
+                        prop.PropertyName = property.PropertyName;
+                        prop.Value = property.Value;
+                        propMan.Add(prop);
+                    }
 
                     //Add placement to list
                     placements.Add(new UserBranchPartPlacement()
@@ -291,7 +320,9 @@ namespace REST.API.Controllers
             using (var db = new BRXXXXXModel(costumernumber)) {
                 UserBranchPartsManager usersPartMan = new UserBranchPartsManager(db);
                 PartsManager partsMan = new PartsManager(db);
+                PartPropertiesManager propMan = new PartPropertiesManager(db);
                 PartPlacementsManager placeMan = new PartPlacementsManager(db);
+                UserBranchPartPropertiesManager userpropMan = new UserBranchPartPropertiesManager(db);
 
                 //Get All containers for this user and project
                 foreach (UserBranchPart container in usersPartMan.GetContainers(username, projectnumber)) {
@@ -301,10 +332,25 @@ namespace REST.API.Controllers
                         CreatedByUsername = username,
                         ModifiedByUsername = username, //Required in case part exists already
                         ProjectId = project.Id,
-                        EntityId = container.EntityId,
+                        PartDefinitionId = container.PartDefinitionId,
                         Name = container.Name,
                     }) as Part;
                     if (newcontainerpart == null) return BadRequest(partsMan.ErrorDefinition);
+
+                    //Remove all current part properties
+                    propMan.RemoveAll(newcontainerpart.Id);
+
+                    //Add container properties
+                    foreach (UserBranchPartProperty property in userpropMan.GetAll(container.Id)) {
+                        PartProperty prop = new PartProperty();
+                        prop.PartId = newcontainerpart.Id;
+                        prop.PropertyId = property.PropertyId;
+                        prop.Value = property.Value;
+                        propMan.Add(prop);
+                    }
+
+                    //Remove all current part placements
+                    placeMan.RemoveAll(newcontainerpart.Id);
 
                     //Get all placements
                     List<PartPlacement> placements = new List<PartPlacement>();
@@ -315,10 +361,22 @@ namespace REST.API.Controllers
                             CreatedByUsername = username,
                             ModifiedByUsername = username, //Required in case part exist already
                             ProjectId = project.Id,
-                            EntityId = kvp.Value.EntityId,
+                            PartDefinitionId = kvp.Value.PartDefinitionId,
                             Name = kvp.Value.Name,
                         }) as Part;
                         if (part == null) return BadRequest(partsMan.ErrorDefinition);
+
+                        //Remove all properties
+                        propMan.RemoveAll(part.Id);
+
+                        //Add properties
+                        foreach (UserBranchPartProperty property in userpropMan.GetAll(kvp.Value.Id)) {
+                            PartProperty prop = new PartProperty();
+                            prop.PartId = part.Id;
+                            prop.PropertyId = property.PropertyId;
+                            prop.Value = property.Value;
+                            propMan.Add(prop);
+                        }
 
                         //Add placement
                         PartPlacement placement = new PartPlacement() {
@@ -337,7 +395,22 @@ namespace REST.API.Controllers
                 //If everything went well ... and at this point it make sense then remove everything
                 UserBranchPartPlacementsManager userPlaceMan = new UserBranchPartPlacementsManager(db);
                 foreach (UserBranchPart container in usersPartMan.GetContainers(username, projectnumber)) {
+                    //Remove all part properties and itself
+                    foreach (KeyValuePair<int, UserBranchPart> kvp in usersPartMan.GetPartPlacements(container.Id)) {
+                        //Remove all properties
+                        userpropMan.RemoveAll(kvp.Value.Id);
+
+                        //Remove the part
+                        usersPartMan.Remove(kvp.Value.Id);
+                    }
+
+                    //Remove all placements
                     userPlaceMan.RemoveAll(container.Id);
+
+                    //Remove all container properties
+                    userpropMan.RemoveAll(container.Id);
+
+                    //Remove container
                     usersPartMan.Remove(container.Id);
                 }
             }
@@ -347,11 +420,11 @@ namespace REST.API.Controllers
 
         #endregion
 
-        #region EntityProperties
+        #region PartDefinitionProperties
 
         // GET api/v1/costumers/{costumernumber}/entityproperties?projectnumber=projectnumber&entityid=entityid}
         [HttpGet("{costumernumber}/entityproperties")]
-        public ActionResult<List<EntityDTO>> GetEntityProperties(string costumernumber, [FromQuery]string projectnumber,[FromQuery]int? entityid)
+        public ActionResult<List<PartDefinitionDTO>> GetEntityProperties(string costumernumber, [FromQuery]string projectnumber,[FromQuery]int? entityid)
         {
             if (GetCostumer(costumernumber) == null) return NotFound(ErrorCatalog.CostumerDoesNotExist);
             Project project = GetProject(costumernumber, projectnumber);
@@ -359,9 +432,9 @@ namespace REST.API.Controllers
 
             using (var db = new BRXXXXXModel(costumernumber))
             {
-                EntityPropertiesManager propMan = new EntityPropertiesManager(db);
-                List<EntityProperty> properties = propMan.Get(costumernumber, entityid);
-                return Ok(Mapper.Map<List<EntityProperty>, List<EntityPropertyDTO>>(properties));
+                PartDefinitionPropertiesManager propMan = new PartDefinitionPropertiesManager(db);
+                List<PartDefinitionProperty> properties = propMan.Get(costumernumber, entityid);
+                return Ok(Mapper.Map<List<PartDefinitionProperty>, List<PartDefinitionPropertyDTO>>(properties));
             }
         }
 
@@ -371,29 +444,29 @@ namespace REST.API.Controllers
 
         // GET api/v1/costumers/{costumernumber}/entities?projectnumber=projectnumber}
         [HttpGet("{costumernumber}/entities")]
-        public ActionResult<List<EntityDTO>> GetEntities(string costumernumber, [FromQuery]string projectnumber)
+        public ActionResult<List<PartDefinitionDTO>> GetEntities(string costumernumber, [FromQuery]string projectnumber)
         {
             if (GetCostumer(costumernumber) == null) return NotFound(ErrorCatalog.CostumerDoesNotExist);
             using (var db = new BRXXXXXModel(costumernumber))
             {
-                EntitiesManager entMan = new EntitiesManager(db);
+                PartDefinitionsManager entMan = new PartDefinitionsManager(db);
                 if (projectnumber == null)
-                    return Ok(Mapper.Map<List<Entity>, List<EntityDTO>>(entMan.GetAll() as List<Entity>));
+                    return Ok(Mapper.Map<List<PartDefinition>, List<PartDefinitionDTO>>(entMan.GetAll() as List<PartDefinition>));
                 else
-                    return Ok(Mapper.Map<List<Entity>, List<EntityDTO>>(entMan.GetByProject(projectnumber)));
+                    return Ok(Mapper.Map<List<PartDefinition>, List<PartDefinitionDTO>>(entMan.GetByProject(projectnumber)));
             }
         }
 
         // POST api/v1/costumers/{costumernumber}/entities
         [HttpPost("{costumernumber}/entities")]
-        public ActionResult PostEntity(string costumernumber, [FromBody]EntityDTO dto)
+        public ActionResult PostEntity(string costumernumber, [FromBody]PartDefinitionDTO dto)
         {
             if (GetCostumer(costumernumber) == null) return NotFound(ErrorCatalog.CostumerDoesNotExist);
             if (GetUser(dto.CreatedByUsername) == null) return NotFound(ErrorCatalog.UserDoesNotExist);
             using (var db = new BRXXXXXModel(costumernumber))
             {
-                EntitiesManager entMan = new EntitiesManager(db);
-                Entity result = entMan.Add(Mapper.Map<EntityDTO, Entity>(dto)) as Entity;
+                PartDefinitionsManager entMan = new PartDefinitionsManager(db);
+                PartDefinition result = entMan.Add(Mapper.Map<PartDefinitionDTO, PartDefinition>(dto)) as PartDefinition;
 
                 if (result == null) return BadRequest(entMan.ErrorDefinition);
 
@@ -403,17 +476,17 @@ namespace REST.API.Controllers
 
         // POST api/v1/costumers/{costumernumber}/entities/entityid
         [HttpGet("{costumernumber}/entities/{entityid:int}")]
-        public ActionResult<EntityDTO> GetEntity(string costumernumber, int entityid)
+        public ActionResult<PartDefinitionDTO> GetEntity(string costumernumber, int entityid)
         {
             if (GetCostumer(costumernumber) == null) return NotFound(ErrorCatalog.CostumerDoesNotExist);
             using (var db = new BRXXXXXModel(costumernumber))
             {
-                EntitiesManager entMan = new EntitiesManager(db);
-                Entity entity = entMan.Get(entityid) as Entity;
+                PartDefinitionsManager entMan = new PartDefinitionsManager(db);
+                PartDefinition entity = entMan.Get(entityid) as PartDefinition;
 
                 if (entity == null) return NotFound(ErrorCatalog.EntityDoesNotExist);
 
-                return Ok(Mapper.Map<Entity, EntityDTO>(entity));
+                return Ok(Mapper.Map<PartDefinition, PartDefinitionDTO>(entity));
             }
         }
 
@@ -424,7 +497,7 @@ namespace REST.API.Controllers
             if (GetCostumer(costumernumber) == null) return NotFound(ErrorCatalog.CostumerDoesNotExist);
             using (var db = new BRXXXXXModel(costumernumber))
             {
-                EntitiesManager entMan = new EntitiesManager(db);
+                PartDefinitionsManager entMan = new PartDefinitionsManager(db);
                 bool deleted = entMan.Remove(entityid);
 
                 if (!deleted) return NotFound(ErrorCatalog.EntityDoesNotExist);

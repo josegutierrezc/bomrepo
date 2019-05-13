@@ -163,7 +163,7 @@ namespace BomRepo.REST.Client
         /// <param name="containername">Required string indicating the name of the container</param>
         /// <param name="parts">Required list of PartPlacementDTO object</param>
         /// <returns></returns>
-        public async Task<bool> PushContainer(string costumernumber, string username, string projectnumber, string containername, List<PartPlacementDTO> parts) {
+        public async Task<bool> PushContainer(string costumernumber, string username, string projectnumber, PartPlacementDTO container, List<PartPlacementDTO> parts) {
             //Initialize communication and get authentication header
             string authHeader = await InitializeCommunication();
 
@@ -171,16 +171,17 @@ namespace BomRepo.REST.Client
             if (ErrorOccurred) return false;
 
             //Prepare data to transmit
-            PartsContainerDTO container = new PartsContainerDTO();
-            container.ParentPartName = containername;
-            container.Placements = parts;
+            PartsContainerDTO containerdto = new PartsContainerDTO();
+            containerdto.ParentPartName = container.PartName;
+            containerdto.ParentProperties = container.PartProperties;
+            containerdto.Placements = parts;
 
             //If everything goes well then lets try to get the data from the service with the authorization header obtained from the InitializationMethod
             //Define the total of requests we can send to the service, if token is valid only one will be needed. If token is invalid then two
             //If at the second request we get no positive response then something is happening with the service or credentials are
             //incorrect, in this case change the latesterrordefinition indicating that
             string url = "api/v1/costumers/" + costumernumber + "/branches/" + username + "?projectnumber=" + projectnumber;
-            var jsonData = JsonConvert.SerializeObject(container);
+            var jsonData = JsonConvert.SerializeObject(containerdto);
             using (HttpContent content = new StringContent(jsonData))
             {
                 content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
@@ -268,7 +269,7 @@ namespace BomRepo.REST.Client
         /// <param name="projectnumber">Required string indicating the project number</param>
         /// <param name="entityid">Required nullable integer indicating the id of entity</param>
         /// <returns></returns>
-        public async Task<List<EntityPropertyDTO>> GetEntityProperties(string costumernumber, string projectnumber, int? entityid) {
+        public async Task<List<PartDefinitionPropertyDTO>> GetEntityProperties(string costumernumber, string projectnumber, int? entityid) {
             //Initialize communication and get authentication header
             string authHeader = await InitializeCommunication();
 
@@ -289,7 +290,7 @@ namespace BomRepo.REST.Client
                     if (response.IsSuccessStatusCode)
                     {
                         var jsonData = response.Content.ReadAsStringAsync().Result;
-                        List<EntityPropertyDTO> entity = JsonConvert.DeserializeObject<List<EntityPropertyDTO>>(jsonData);
+                        List<PartDefinitionPropertyDTO> entity = JsonConvert.DeserializeObject<List<PartDefinitionPropertyDTO>>(jsonData);
                         return entity;
                     }
                     else if (response.StatusCode != System.Net.HttpStatusCode.Unauthorized)
@@ -314,7 +315,7 @@ namespace BomRepo.REST.Client
         /// <param name="costumernumber">Required string indicating costumer number</param>
         /// <param name="projectnumber">Required string indicating projectnumber</param>
         /// <returns></returns>
-        public async Task<List<EntityDTO>> GetProjectEntities(string costumernumber, string projectnumber) {
+        public async Task<List<PartDefinitionDTO>> GetProjectEntities(string costumernumber, string projectnumber) {
             //Initialize communication and get authentication header
             string authHeader = await InitializeCommunication();
 
@@ -335,7 +336,7 @@ namespace BomRepo.REST.Client
                     if (response.IsSuccessStatusCode)
                     {
                         var jsonData = response.Content.ReadAsStringAsync().Result;
-                        List<EntityDTO> entity = JsonConvert.DeserializeObject<List<EntityDTO>>(jsonData);
+                        List<PartDefinitionDTO> entity = JsonConvert.DeserializeObject<List<PartDefinitionDTO>>(jsonData);
                         return entity;
                     }
                     else if (response.StatusCode != System.Net.HttpStatusCode.Unauthorized)

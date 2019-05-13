@@ -21,8 +21,8 @@ namespace BomRepo.Autocad.API.Forms
         private ProjectDTO project;
         private PartPlacementDTO cadcontainer;
         private SortedDictionary<string, PartPlacementDTO> containerparts;
-        private List<EntityDTO> projectentities;
-        private List<EntityPropertyDTO> projectentityproperties;
+        private List<PartDefinitionDTO> projectentities;
+        private List<PartDefinitionPropertyDTO> projectentityproperties;
 
         public pushform()
         {
@@ -45,7 +45,26 @@ namespace BomRepo.Autocad.API.Forms
 
         private async void btnPush_Click(object sender, EventArgs e)
         {
-            bool pushed = await BomRepoServiceClient.Instance.PushContainer(costumernumber, username, project.Number, cadcontainer.PartName, containerparts.Values.ToList());
+            //Update container properties with data typed in datagrid
+            cadcontainer.PartProperties = GetPropertiesFromRow(dgvContainer.Rows[0]);
+
+            //Create a list of container parts based in dgv data
+            List<PartPlacementDTO> placements = new List<PartPlacementDTO>();
+            foreach (DataGridViewRow dr in dgvParts.Rows) {
+                //Get data element that contains more accurated information
+                DataElement element = dr.Tag as DataElement;
+
+                //Create the placement
+                PartPlacementDTO placement = new PartPlacementDTO();
+                placement.PartName = element.PartName;
+                placement.Qty = element.Qty;
+                placement.PartProperties = GetPropertiesFromRow(dr);
+
+                //Add it to the list
+                placements.Add(placement);
+            }
+
+            bool pushed = await BomRepoServiceClient.Instance.PushContainer(costumernumber, username, project.Number, cadcontainer, placements);
             if (!pushed) {
                 errordialog errord = new errordialog(BomRepoServiceClient.Instance.Error, "Unable to push this container to your repository.");
                 errord.ShowDialog();
@@ -90,29 +109,32 @@ namespace BomRepo.Autocad.API.Forms
                 //Create entity properties dictionary
                 //Dictionary<entity.id, List<PartPropertyDTO>>
                 Dictionary<int, List<PropertyDTO>> entityproperties = new Dictionary<int, List<PropertyDTO>>();
-                foreach (EntityPropertyDTO ep in projectentityproperties) {
+                foreach (PartDefinitionPropertyDTO ep in projectentityproperties) {
                     List<PropertyDTO> properties = null;
-                    if (!entityproperties.TryGetValue(ep.EntityId, out properties)) {
+                    if (!entityproperties.TryGetValue(ep.PartDefinitionId, out properties)) {
                         properties = new List<PropertyDTO>();
-                        entityproperties.Add(ep.EntityId, properties);
+                        entityproperties.Add(ep.PartDefinitionId, properties);
                     }
                     properties.Add(ep.Property);
                 }
 
                 //Find an entity that matches container name and create a DataElement for container
                 DataElement containergridelement = new DataElement();
-                containergridelement.Entity = GetEntityByPattern(cadcontainer.PartName);
+                containergridelement.PartDefinition = GetEntityByPattern(cadcontainer.PartName);
                 containergridelement.PartName = cadcontainer.PartName;
                 containergridelement.Qty = 1;
                 containergridelement.Properties = new List<PartPropertyDTO>();
+
+                //Keep a copy of this object in DGV container to be used later when pushing data to repository
+                dgvContainer.Tag = containergridelement;
 
                 //Create a grid columns dictionary for container so later we can create datagridcolumns Dictionary<propertyname, columnindex>
                 Dictionary<string, int> containergridcolumns = new Dictionary<string, int>();
 
                 //Add columns if an entity was found
-                if (containergridelement.Entity != null) {
-                    if (entityproperties.ContainsKey(containergridelement.Entity.Id)) {
-                        foreach (PropertyDTO prop in entityproperties[containergridelement.Entity.Id])
+                if (containergridelement.PartDefinition != null) {
+                    if (entityproperties.ContainsKey(containergridelement.PartDefinition.Id)) {
+                        foreach (PropertyDTO prop in entityproperties[containergridelement.PartDefinition.Id])
                         {
                             //Lets check if this property was assigned from autocad. If if does then get it.
                             PartPropertyDTO cadprop = null;
@@ -149,19 +171,20 @@ namespace BomRepo.Autocad.API.Forms
                 crow.Cells[0].Value = containergridelement.PartName.ToUpper();
 
                 //Search for errors
-                if (containergridelement.Entity == null)
+                if (containergridelement.PartDefinition == null)
                 {
                     crow.Cells[0].ErrorText = "No definition was found that match this part name pattern.";
                     errorsdict["container"].Add(new KeyValuePair<string, string>(containergridelement.PartName, crow.Cells[0].ErrorText));
                 }
-                else if (!containergridelement.Entity.IsContainer) {
+                else if (!containergridelement.PartDefinition.IsContainer) {
                     crow.Cells[0].ErrorText = "Container part is required.";
                     errorsdict["container"].Add(new KeyValuePair<string, string>(containergridelement.PartName, crow.Cells[0].ErrorText));
                 }
 
-                //Populate datagrid
+                //Populate container datagrid
                 foreach (PartPropertyDTO prop in containergridelement.Properties) {
                     crow.Cells[containergridcolumns[prop.PropertyName.ToUpper()]].Value = prop.Value;
+                    crow.Cells[containergridcolumns[prop.PropertyName.ToUpper()]].Tag = prop;
                 }
 
                 //Create a grid columns dictionary for later datagridcolumns creation Dictionary<propertyname, columnindex>
@@ -177,7 +200,7 @@ namespace BomRepo.Autocad.API.Forms
 
                     //Create a new grid data element
                     DataElement element = new DataElement();
-                    element.Entity = GetEntityByPattern(partname); ;
+                    element.PartDefinition = GetEntityByPattern(partname); ;
                     element.PartName = partname;
                     element.Qty = placement.Qty;
                     element.Properties = new List<PartPropertyDTO>();
@@ -186,10 +209,10 @@ namespace BomRepo.Autocad.API.Forms
                     partgridelements.Add(element);
 
                     //If entity was not found then no properties need to be matched
-                    if (element.Entity != null) {
+                    if (element.PartDefinition != null) {
                         //Lets add every entity required property and see if the autocad part has it
-                        if (entityproperties.ContainsKey(element.Entity.Id)) {
-                            foreach (PropertyDTO prop in entityproperties[element.Entity.Id])
+                        if (entityproperties.ContainsKey(element.PartDefinition.Id)) {
+                            foreach (PropertyDTO prop in entityproperties[element.PartDefinition.Id])
                             {
                                 //Lets check if this property was assigned from autocad. If if does then get it.
                                 PartPropertyDTO cadprop = null;
@@ -210,6 +233,8 @@ namespace BomRepo.Autocad.API.Forms
                                     cadprop.PropertyName = prop.Name;
                                     cadprop.Value = string.Empty;
                                 }
+                                else //If it was found then assign its id
+                                    cadprop.PropertyId = prop.Id;
 
                                 //Add property to the element
                                 element.Properties.Add(cadprop);
@@ -230,16 +255,29 @@ namespace BomRepo.Autocad.API.Forms
 
                 //Populate datagridview
                 foreach (DataElement element in partgridelements) {
+                    //Add new row
                     int rowindex = dgvParts.Rows.Add();
+
+                    //Make a copy of all column ids
                     List<int> colindices = partsgridcolumns.Values.ToList();
+
+                    //Get the already created row
                     DataGridViewRow dr = dgvParts.Rows[rowindex];
+
+                    //Keep a copy of this DataElement in the row to be used later when pushing to repository
+                    dr.Tag = element;
+
+                    //Set qty and name
                     dr.Cells[0].Value = element.Qty;
                     dr.Cells[1].Value = element.PartName;
-                    if (element.Entity == null) {
+
+                    //Show an error in the part name cell if a part definition was not found
+                    if (element.PartDefinition == null) {
                         dr.Cells[1].ErrorText = ErrorCatalog.EntityDoesNotExist.Title;
                         errorsdict["parts"].Add(new KeyValuePair<string, string>(element.PartName, dr.Cells[1].ErrorText));
                     }
                     
+                    //Populate property values
                     foreach (PartPropertyDTO property in element.Properties) {
                         dr.Cells[partsgridcolumns[property.PropertyName.ToUpper()]].Value = property.Value;
                         dr.Cells[partsgridcolumns[property.PropertyName.ToUpper()]].Tag = property;
@@ -255,6 +293,7 @@ namespace BomRepo.Autocad.API.Forms
                 }
 
                 lblProjectNumber.Text = project.Number + " - " + project.Name;
+                lblBranch.Text = username;
                 btnPush.Enabled = errorsdict["container"].Count() == 0 & errorsdict["parts"].Count() == 0 & partgridelements.Count() != 0;
                 btnErrors.Enabled = !btnPush.Enabled;
             }
@@ -268,9 +307,18 @@ namespace BomRepo.Autocad.API.Forms
             }
         }
 
+        private void dgvParts_DataError(object sender, DataGridViewDataErrorEventArgs e)
+        {
+            string[] splittedvaluetype = dgvParts.Columns[e.ColumnIndex].ValueType.ToString().Split('.');
+            string valuetype = splittedvaluetype[splittedvaluetype.Length - 1].ToLower();
+            MessageBox.Show("Value of type " + valuetype + " is required.", "BomRepo - Validation error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            e.Cancel = true;
+            return;
+        }
+
         #region Helpers
-        private EntityDTO GetEntityByPattern(string partname) {
-            foreach (EntityDTO entity in projectentities) {
+        private PartDefinitionDTO GetEntityByPattern(string partname) {
+            foreach (PartDefinitionDTO entity in projectentities) {
                 if (EntityNamePattern.EntityNamePattern.MatchPattern(entity.NamePattern, partname)) return entity;
             }
             return null;
@@ -316,20 +364,22 @@ namespace BomRepo.Autocad.API.Forms
 
             return colindex;
         }
-        #endregion
+        private List<PartPropertyDTO> GetPropertiesFromRow(DataGridViewRow row) {
+            List<PartPropertyDTO> properties = new List<PartPropertyDTO>();
+            foreach (DataGridViewCell cell in row.Cells) {
+                if (cell.Tag == null) continue;
 
-        private void dgvParts_DataError(object sender, DataGridViewDataErrorEventArgs e)
-        {
-            string[] splittedvaluetype = dgvParts.Columns[e.ColumnIndex].ValueType.ToString().Split('.');
-            string valuetype = splittedvaluetype[splittedvaluetype.Length - 1].ToLower();
-            MessageBox.Show("Value of type " + valuetype + " is required.", "BomRepo - Validation error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            e.Cancel = true;
-            return;
+                PartPropertyDTO property = cell.Tag as PartPropertyDTO;
+                property.Value = cell.Value.ToString();
+                properties.Add(property);
+            }
+            return properties;
         }
+        #endregion
     }
 
     public class DataElement {
-        public EntityDTO Entity { get; set; }
+        public PartDefinitionDTO PartDefinition { get; set; }
         public string PartName { get; set; }
         public int Qty { get; set; }
         public List<PartPropertyDTO> Properties { get; set; }

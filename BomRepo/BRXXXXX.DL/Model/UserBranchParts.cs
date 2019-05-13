@@ -11,14 +11,14 @@ namespace BomRepo.BRXXXXX.DL
         public int Id { get; set; }
         public DateTime CreatedOn { get; set; }
         public int UserBranchId { get; set; }
-        public int EntityId { get; set; }
+        public int PartDefinitionId { get; set; }
         public string Name { get; set; }
     }
 
     public class UserBranchPartValidator : AbstractValidator<UserBranchPart> {
         public UserBranchPartValidator() {
             RuleFor(e => e.UserBranchId).NotNull();
-            RuleFor(e => e.EntityId).NotNull();
+            RuleFor(e => e.PartDefinitionId).NotNull();
             RuleFor(e => e.Name).NotNull().NotEmpty();
             RuleFor(e => e.UserBranchId).NotNull().NotEmpty();
         }

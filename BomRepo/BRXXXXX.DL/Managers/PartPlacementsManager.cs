@@ -75,6 +75,11 @@ namespace BomRepo.BRXXXXX.DL
             throw new NotImplementedException();
         }
 
+        public void RemoveAll(int partid) {
+            db.PartPlacements.RemoveRange(db.PartPlacements.Where(e => e.ParentPartId == partid));
+            db.SaveChanges();
+        }
+
         public override bool Update(object entity)
         {
             throw new NotImplementedException();

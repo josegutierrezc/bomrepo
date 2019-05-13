@@ -5,30 +5,30 @@ using System.Linq;
 
 namespace BomRepo.BRXXXXX.DL
 {
-    public class EntityPropertiesManager : EntityManagerBase
+    public class PartDefinitionPropertiesManager : EntityManagerBase
     {
-        public EntityPropertiesManager(BRXXXXXModel db) : base(db) { }
+        public PartDefinitionPropertiesManager(BRXXXXXModel db) : base(db) { }
 
         public override object Add(object entity)
         {
             throw new NotImplementedException();
         }
 
-        public List<EntityProperty> Get(string projectnumber, int? entityid) {
+        public List<PartDefinitionProperty> Get(string projectnumber, int? entityid) {
             var query = from p in db.Projects
-                        join pe in db.ProjectEntities on p.Id equals pe.ProjectId
-                        join eprop in db.EntityProperties on pe.EntityId equals eprop.EntityId
+                        join pe in db.ProjectPartDefinitions on p.Id equals pe.ProjectId
+                        join eprop in db.PartDefinitionProperties on pe.PartDefinitionId equals eprop.PartDefinitionId
                         join prop in db.Properties on eprop.PropertyId equals prop.Id
                         where p.Number == projectnumber
                         orderby eprop.ShowOrder
-                        select new EntityProperty {
-                            EntityId = eprop.EntityId,
+                        select new PartDefinitionProperty {
+                            PartDefinitionId = eprop.PartDefinitionId,
                             PropertyId = eprop.PropertyId,
                             Property = prop
                         };
             if (entityid == null) return query.ToList();
 
-            return query.Where(e => e.EntityId == entityid).ToList();
+            return query.Where(e => e.PartDefinitionId == entityid).ToList();
         }
 
         public override object Get(int entityid)

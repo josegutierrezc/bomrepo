@@ -13,7 +13,7 @@ namespace BomRepo.BRXXXXX.DL
         public DateTime? ModifiedOn { get; set; }
         public string ModifiedByUsername { get; set; }
         public int ProjectId { get; set; }
-        public int EntityId { get; set; }
+        public int PartDefinitionId { get; set; }
         public string Name { get; set; }
     }
 
@@ -21,7 +21,7 @@ namespace BomRepo.BRXXXXX.DL
         public PartValidator() {
             RuleFor(e => e.CreatedByUsername).NotNull().NotEmpty();
             RuleFor(e => e.ProjectId).NotNull();
-            RuleFor(e => e.EntityId).NotNull();
+            RuleFor(e => e.PartDefinitionId).NotNull();
             RuleFor(e => e.Name).NotNull().NotEmpty();
         }
     }

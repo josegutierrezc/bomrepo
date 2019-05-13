@@ -5,7 +5,7 @@ using FluentValidation;
 
 namespace BomRepo.BRXXXXX.DL
 {
-    public class Entity
+    public class PartDefinition
     {
         public int Id { get; set; }
         public DateTime CreatedOn { get; set; }
@@ -18,7 +18,7 @@ namespace BomRepo.BRXXXXX.DL
         public string NamePattern { get; set; }
     }
 
-    public class EntityValidator : AbstractValidator<Entity> {
+    public class EntityValidator : AbstractValidator<PartDefinition> {
         public EntityValidator() {
             RuleFor(e => e.CreatedByUsername).NotNull().NotEmpty().WithMessage("CreatedByUsername field cannot be null or empty.");
             RuleFor(e => e.IsContainer).NotNull();

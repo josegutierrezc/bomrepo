@@ -5,9 +5,9 @@ using System.Text;
 
 namespace BomRepo.BRXXXXX.DL
 {
-    public class EntityProperty
+    public class PartDefinitionProperty
     {
-        public int EntityId { get; set; }
+        public int PartDefinitionId { get; set; }
         public int PropertyId { get; set; }
         public int ShowOrder { get; set; }
         [NotMapped]

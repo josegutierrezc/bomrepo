@@ -21,12 +21,12 @@ namespace BomRepo.BRXXXXX.DL
         public virtual DbSet<UserBranchPart> UserBranchParts { get; set; }
         public virtual DbSet<UserBranchPartPlacement> UserBranchPartPlacements { get; set; }
         public virtual DbSet<UserBranchPartProperty> UserBranchPartProperties { get; set; }
-        public virtual DbSet<Entity> Entities { get; set; }
-        public virtual DbSet<ProjectEntity> ProjectEntities { get; set; }
+        public virtual DbSet<PartDefinition> PartDefinitions { get; set; }
+        public virtual DbSet<ProjectPartDefinition> ProjectPartDefinitions { get; set; }
         public virtual DbSet<Part> Parts { get; set; }
         public virtual DbSet<PartPlacement> PartPlacements { get; set; }
         public virtual DbSet<Property> Properties { get; set; }
-        public virtual DbSet<EntityProperty> EntityProperties { get; set; }
+        public virtual DbSet<PartDefinitionProperty> PartDefinitionProperties { get; set; }
         public virtual DbSet<PartProperty> PartProperties { get; set; }
         
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -69,7 +69,7 @@ namespace BomRepo.BRXXXXX.DL
                 entity.HasKey(e => new { e.Id });
                 entity.Property(e => e.CreatedOn).IsRequired();
                 entity.Property(e => e.UserBranchId).IsRequired();
-                entity.Property(e => e.EntityId).IsRequired();
+                entity.Property(e => e.PartDefinitionId).IsRequired();
                 entity.Property(e => e.Name).IsRequired();
             });
 
@@ -83,14 +83,14 @@ namespace BomRepo.BRXXXXX.DL
                 entity.HasKey(e => new { e.UserBranchPartId, e.PropertyId });
             });
 
-            modelBuilder.Entity<Entity>(entity =>
+            modelBuilder.Entity<PartDefinition>(entity =>
             {
                 entity.HasKey(e => new { e.Id });
             });
 
-            modelBuilder.Entity<ProjectEntity>(entity =>
+            modelBuilder.Entity<ProjectPartDefinition>(entity =>
             {
-                entity.HasKey(e => new { e.EntityId, e.ProjectId });
+                entity.HasKey(e => new { e.PartDefinitionId, e.ProjectId });
             });
 
             modelBuilder.Entity<Part>(entity =>
@@ -113,8 +113,8 @@ namespace BomRepo.BRXXXXX.DL
                 entity.Property(e => e.IsDateTime).IsRequired();
             });
 
-            modelBuilder.Entity<EntityProperty>(entity => {
-                entity.HasKey(e => new { e.EntityId, e.PropertyId });
+            modelBuilder.Entity<PartDefinitionProperty>(entity => {
+                entity.HasKey(e => new { e.PartDefinitionId, e.PropertyId });
             });
 
             modelBuilder.Entity<PartProperty>(entity => {

@@ -4,9 +4,9 @@ using System.Text;
 
 namespace BomRepo.BRXXXXX.DL
 {
-    public class ProjectEntity
+    public class ProjectPartDefinition
     {
-        public int EntityId { get; set; }
+        public int PartDefinitionId { get; set; }
         public int ProjectId { get; set; }
     }
 }

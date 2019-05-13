@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.btnPush = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
@@ -48,6 +48,8 @@
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.linkContainerInstructions = new System.Windows.Forms.LinkLabel();
             this.btnErrors = new System.Windows.Forms.Button();
+            this.label2 = new System.Windows.Forms.Label();
+            this.lblBranch = new System.Windows.Forms.Label();
             this.tableLayoutPanel1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
@@ -78,7 +80,7 @@
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 6;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 48F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 81F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 7F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 101F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 7F));
@@ -117,11 +119,11 @@
             this.tableLayoutPanel1.SetColumnSpan(this.groupBox1, 4);
             this.groupBox1.Controls.Add(this.tableLayoutPanel3);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.groupBox1.Location = new System.Drawing.Point(0, 163);
+            this.groupBox1.Location = new System.Drawing.Point(0, 196);
             this.groupBox1.Margin = new System.Windows.Forms.Padding(0);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(7);
-            this.groupBox1.Size = new System.Drawing.Size(310, 280);
+            this.groupBox1.Size = new System.Drawing.Size(310, 247);
             this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "  Parts  ";
@@ -139,14 +141,14 @@
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 4F));
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 21F));
-            this.tableLayoutPanel3.Size = new System.Drawing.Size(296, 253);
+            this.tableLayoutPanel3.Size = new System.Drawing.Size(296, 220);
             this.tableLayoutPanel3.TabIndex = 0;
             // 
             // linkPartsInstructions
             // 
             this.linkPartsInstructions.AutoSize = true;
             this.linkPartsInstructions.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.linkPartsInstructions.Location = new System.Drawing.Point(3, 236);
+            this.linkPartsInstructions.Location = new System.Drawing.Point(3, 203);
             this.linkPartsInstructions.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.linkPartsInstructions.Name = "linkPartsInstructions";
             this.linkPartsInstructions.Size = new System.Drawing.Size(290, 13);
@@ -171,14 +173,14 @@
             this.dgvParts.MultiSelect = false;
             this.dgvParts.Name = "dgvParts";
             this.dgvParts.RowHeadersVisible = false;
-            this.dgvParts.Size = new System.Drawing.Size(290, 222);
+            this.dgvParts.Size = new System.Drawing.Size(290, 189);
             this.dgvParts.TabIndex = 0;
             this.dgvParts.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dgvParts_DataError);
             // 
             // Column1
             // 
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.Column1.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.Column1.DefaultCellStyle = dataGridViewCellStyle1;
             this.Column1.HeaderText = "Quantity";
             this.Column1.Name = "Column1";
             this.Column1.ReadOnly = true;
@@ -199,7 +201,7 @@
             this.groupBox2.Location = new System.Drawing.Point(0, 0);
             this.groupBox2.Margin = new System.Windows.Forms.Padding(0);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(310, 48);
+            this.groupBox2.Size = new System.Drawing.Size(310, 81);
             this.groupBox2.TabIndex = 5;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "  Project  ";
@@ -209,16 +211,19 @@
             this.tableLayoutPanel2.ColumnCount = 2;
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 107F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel2.Controls.Add(this.lblBranch, 1, 2);
             this.tableLayoutPanel2.Controls.Add(this.label1, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.lblProjectNumber, 1, 0);
+            this.tableLayoutPanel2.Controls.Add(this.label2, 0, 2);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 16);
             this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
-            this.tableLayoutPanel2.RowCount = 1;
+            this.tableLayoutPanel2.RowCount = 3;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 29F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 4F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 29F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(304, 29);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(304, 62);
             this.tableLayoutPanel2.TabIndex = 0;
             // 
             // label1
@@ -251,7 +256,7 @@
             this.tableLayoutPanel1.SetColumnSpan(this.groupBox3, 4);
             this.groupBox3.Controls.Add(this.tableLayoutPanel4);
             this.groupBox3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.groupBox3.Location = new System.Drawing.Point(0, 55);
+            this.groupBox3.Location = new System.Drawing.Point(0, 88);
             this.groupBox3.Margin = new System.Windows.Forms.Padding(0);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Padding = new System.Windows.Forms.Padding(7);
@@ -325,6 +330,31 @@
             this.btnErrors.Text = "&Error details";
             this.btnErrors.UseVisualStyleBackColor = true;
             // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label2.Location = new System.Drawing.Point(3, 33);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(101, 29);
+            this.label2.TabIndex = 3;
+            this.label2.Text = "Branch:";
+            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // lblBranch
+            // 
+            this.lblBranch.AutoSize = true;
+            this.lblBranch.BackColor = System.Drawing.Color.White;
+            this.lblBranch.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblBranch.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblBranch.Location = new System.Drawing.Point(110, 37);
+            this.lblBranch.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.lblBranch.Name = "lblBranch";
+            this.lblBranch.Size = new System.Drawing.Size(191, 21);
+            this.lblBranch.TabIndex = 4;
+            this.lblBranch.Text = "label3";
+            this.lblBranch.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
             // pushform
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -376,5 +406,7 @@
         private System.Windows.Forms.LinkLabel linkContainerInstructions;
         private System.Windows.Forms.LinkLabel linkPartsInstructions;
         private System.Windows.Forms.Button btnErrors;
+        private System.Windows.Forms.Label lblBranch;
+        private System.Windows.Forms.Label label2;
     }
 }

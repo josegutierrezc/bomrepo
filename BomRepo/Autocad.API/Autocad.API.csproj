@@ -75,11 +75,11 @@
     <Compile Include="..\BRMaster.DTO\UsersDTO.cs">
       <Link>BRMaster.DTO\UsersDTO.cs</Link>
     </Compile>
-    <Compile Include="..\BRXXXX.DTO\EntityDTO.cs">
-      <Link>BRXXXXX.DTO\EntityDTO.cs</Link>
+    <Compile Include="..\BRXXXX.DTO\PartDefinitionDTO.cs">
+      <Link>BRXXXXX.DTO\PartDefinitionDTO.cs</Link>
     </Compile>
-    <Compile Include="..\BRXXXX.DTO\EntityPropertyDTO.cs">
-      <Link>BRXXXXX.DTO\EntityPropertyDTO.cs</Link>
+    <Compile Include="..\BRXXXX.DTO\PartDefinitionPropertyDTO.cs">
+      <Link>BRXXXXX.DTO\PartDefinitionPropertyDTO.cs</Link>
     </Compile>
     <Compile Include="..\BRXXXX.DTO\PartDTO.cs">
       <Link>BRXXXXX.DTO\PartDTO.cs</Link>
