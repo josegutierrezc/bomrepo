@@ -35,19 +35,22 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="accoremgd">
-      <HintPath>..\..\..\..\..\..\..\Program Files\Autodesk\AutoCAD 2016\accoremgd.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Temp\Autocad\accoremgd.dll</HintPath>
+    </Reference>
+    <Reference Include="AcCui">
+      <HintPath>..\..\..\..\..\..\..\Temp\Autocad\AcCui.dll</HintPath>
     </Reference>
     <Reference Include="acdbmgd">
-      <HintPath>..\..\..\..\..\..\..\Program Files\Autodesk\AutoCAD 2016\acdbmgd.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Temp\Autocad\acdbmgd.dll</HintPath>
     </Reference>
     <Reference Include="acmgd">
-      <HintPath>..\..\..\..\..\..\..\Program Files\Autodesk\AutoCAD 2016\acmgd.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Temp\Autocad\acmgd.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.IdentityModel.Logging, Version=5.4.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.IdentityModel.Logging.5.4.0\lib\net461\Microsoft.IdentityModel.Logging.dll</HintPath>
+    <Reference Include="AcWindows">
+      <HintPath>..\..\..\..\..\..\..\Temp\Autocad\AcWindows.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.IdentityModel.Tokens, Version=5.4.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.IdentityModel.Tokens.5.4.0\lib\net461\Microsoft.IdentityModel.Tokens.dll</HintPath>
+    <Reference Include="AdWindows">
+      <HintPath>..\..\..\..\..\..\..\Temp\Autocad\AdWindows.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -69,89 +72,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\BRMaster.DTO\CostumersDTO.cs">
-      <Link>BRMaster.DTO\CostumersDTO.cs</Link>
-    </Compile>
-    <Compile Include="..\BRMaster.DTO\UsersDTO.cs">
-      <Link>BRMaster.DTO\UsersDTO.cs</Link>
-    </Compile>
-    <Compile Include="..\BRXXXX.DTO\PartDefinitionDTO.cs">
-      <Link>BRXXXXX.DTO\PartDefinitionDTO.cs</Link>
-    </Compile>
-    <Compile Include="..\BRXXXX.DTO\PartDefinitionPropertyDTO.cs">
-      <Link>BRXXXXX.DTO\PartDefinitionPropertyDTO.cs</Link>
-    </Compile>
-    <Compile Include="..\BRXXXX.DTO\PartDTO.cs">
-      <Link>BRXXXXX.DTO\PartDTO.cs</Link>
-    </Compile>
-    <Compile Include="..\BRXXXX.DTO\PartPlacementDTO.cs">
-      <Link>BRXXXXX.DTO\PartPlacementDTO.cs</Link>
-    </Compile>
-    <Compile Include="..\BRXXXX.DTO\PartPropertyDTO.cs">
-      <Link>BRXXXXX.DTO\PartPropertyDTO.cs</Link>
-    </Compile>
-    <Compile Include="..\BRXXXX.DTO\PartsContainerDTO.cs">
-      <Link>BRXXXXX.DTO\PartsContainerDTO.cs</Link>
-    </Compile>
-    <Compile Include="..\BRXXXX.DTO\ProjectDTO.cs">
-      <Link>BRXXXXX.DTO\ProjectDTO.cs</Link>
-    </Compile>
-    <Compile Include="..\BRXXXX.DTO\ProjectStatusDTO.cs">
-      <Link>BRXXXXX.DTO\ProjectStatusDTO.cs</Link>
-    </Compile>
-    <Compile Include="..\BRXXXX.DTO\PropertyDTO.cs">
-      <Link>BRXXXXX.DTO\PropertyDTO.cs</Link>
-    </Compile>
-    <Compile Include="..\BRXXXX.DTO\UserBranchDTO.cs">
-      <Link>BRXXXXX.DTO\UserBranchDTO.cs</Link>
-    </Compile>
-    <Compile Include="..\BRXXXX.DTO\UserBranchPartDTO.cs">
-      <Link>BRXXXXX.DTO\UserBranchPartDTO.cs</Link>
-    </Compile>
-    <Compile Include="..\EntityNamePattern\EntityNamePattern.cs">
-      <Link>EntityNamePattern\EntityNamePattern.cs</Link>
-    </Compile>
-    <Compile Include="..\ErrorsCatalog\ErrorsCatalog.cs">
-      <Link>ErrorsCatalog\ErrorsCatalog.cs</Link>
-    </Compile>
-    <Compile Include="..\REST.Client\Connector.cs">
-      <Link>REST.Client\Connector.cs</Link>
-    </Compile>
-    <Compile Include="..\REST.Client\Helper.cs">
-      <Link>REST.Client\Helper.cs</Link>
-    </Compile>
-    <Compile Include="Commands.cs" />
-    <Compile Include="Forms\errordialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\errordialog.Designer.cs">
-      <DependentUpon>errordialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\getrepoform.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\getrepoform.Designer.cs">
-      <DependentUpon>getrepoform.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\loginform.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\loginform.Designer.cs">
-      <DependentUpon>loginform.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\projectselectionform.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\projectselectionform.Designer.cs">
-      <DependentUpon>projectselectionform.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\pushform.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\pushform.Designer.cs">
-      <DependentUpon>pushform.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Helper.cs" />
+    <Compile Include="CadCommands.cs" />
+    <Compile Include="DataRepository.cs" />
+    <Compile Include="Models\Costumers.cs" />
+    <Compile Include="Models\PartDefinitionProperties.cs" />
+    <Compile Include="Models\PartDefinitions.cs" />
+    <Compile Include="Models\Projects.cs" />
+    <Compile Include="Models\Properties.cs" />
+    <Compile Include="Models\PropertyValueTypes.cs" />
+    <Compile Include="Models\Users.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -164,25 +93,11 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Forms\errordialog.resx">
-      <DependentUpon>errordialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\getrepoform.resx">
-      <DependentUpon>getrepoform.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\loginform.resx">
-      <DependentUpon>loginform.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\projectselectionform.resx">
-      <DependentUpon>projectselectionform.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\pushform.resx">
-      <DependentUpon>pushform.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
