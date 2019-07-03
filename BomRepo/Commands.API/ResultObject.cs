@@ -10,5 +10,12 @@ namespace Commands.API
     {
         public bool Success { get; set; }
         public Dictionary<string, object> Data { get; set; }
+        public string ErrorDescription { get; set; }
+        public ResultObject() {
+            Success = true;
+            Data = new Dictionary<string, object>();
+            ErrorDescription = string.Empty;
+        }
     }
+
 }

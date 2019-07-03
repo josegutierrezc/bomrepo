@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DTO
 {
-    public class EntityPropertyDTO
+    public class PropertyDTO
     {
         public int Id { get; set; }
         public int CompanyId { get; set; }
